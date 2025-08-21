@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
+  <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
+  <!-- Tu lunaradio modificado -->
+  <script src="js/lunaradio-sincors.js"></script>
   <style>
     body {
       margin: 0;
@@ -12,136 +16,82 @@
       font-family: 'Bebas Neue', sans-serif;
       text-align: center;
     }
-    h1 {
-      font-size: 2em;
-      margin: 10px 0;
+    #station {
+      font-size: 32px;
+      margin-top: 20px;
     }
     #cover {
       width: 250px;
       height: 250px;
-      border-radius: 10px; /* cuadrado con esquinas redondeadas */
-      object-fit: cover;
-      margin: 10px auto;
+      margin: 20px auto;
+      border-radius: 8px; /* cuadrada con esquinas suaves */
       display: block;
     }
-    #song {
-      font-size: 1.2em;
+    #songtitle {
+      font-size: 18px;
       margin: 10px 0;
     }
-    #playBtn {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
+    #playbtn {
+      margin-top: 20px;
+      padding: 12px 25px;
       border: none;
-      background: #ff4444;
+      border-radius: 30px;
+      background: #FF6767;
       color: #fff;
       font-size: 18px;
       cursor: pointer;
-      margin: 20px auto;
-      display: block;
+      transition: 0.3s;
     }
-    #visualizer {
-      width: 100%;
-      height: 100px;
-      background: #111;
-      margin-top: 20px;
+    #playbtn:hover {
+      background: #ff3c3c;
     }
   </style>
 </head>
 <body>
-  <h1>BELLOS RECUERDOS</h1>
-  <img id="cover" src="brlogo.png" alt="Carátula">
-  <div id="song">Cargando canción...</div>
-  <button id="playBtn">Stop</button>
-  <canvas id="visualizer"></canvas>
 
-  <!-- Audio nativo -->
+  <div id="station">BELLOS RECUERDOS</div>
+  <img id="cover" src="js/brlogo.png" alt="Carátula">
+  <div id="songtitle">Cargando canción...</div>
+
+  <!-- Botón Play/Stop -->
+  <button id="playbtn">⏸️ Pausar</button>
+
+  <!-- Reproductor nativo (oculto) -->
   <audio id="radioNative" autoplay>
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
   <script>
     const audio = document.getElementById("radioNative");
-    const playBtn = document.getElementById("playBtn");
-    const songDiv = document.getElementById("song");
-    const coverImg = document.getElementById("cover");
-    let isPlaying = true;
+    const playBtn = document.getElementById("playbtn");
 
-    // Botón Play/Stop
+    audio.volume = 0.8;
+    audio.play().catch(() => console.log("Autoplay bloqueado"));
+
+    // Función para Play/Stop (stop = recargar el stream para que siga en vivo)
     playBtn.addEventListener("click", () => {
-      if (isPlaying) {
+      if (!audio.paused) {
         audio.pause();
-        audio.currentTime = 0; // actuar como STOP
-        playBtn.textContent = "Play";
+        playBtn.textContent = "▶️ Reproducir";
       } else {
+        audio.load(); // reset para sincronizar al vivo
         audio.play();
-        playBtn.textContent = "Stop";
+        playBtn.textContent = "⏸️ Pausar";
       }
-      isPlaying = !isPlaying;
     });
 
-    // Función para obtener metadatos del servidor Shoutcast
-    async function fetchMetadata() {
-      try {
-        const res = await fetch("https://whmsonic.playerfullhd.com:7034/statistics?json=1");
-        const data = await res.json();
-        if (data.songtitle) {
-          songDiv.textContent = data.songtitle;
-          updateCover(data.songtitle);
-        }
-      } catch (e) {
-        console.log("Error metadata:", e);
-      }
-    }
-
-    // Buscar portada en iTunes
-    async function updateCover(songtitle) {
-      try {
-        const query = encodeURIComponent(songtitle);
-        const res = await fetch(`https://itunes.apple.com/search?term=${query}&limit=1`);
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          coverImg.src = data.results[0].artworkUrl100.replace("100x100", "300x300");
-        } else {
-          coverImg.src = "brlogo.png"; // fallback
-        }
-      } catch {
-        coverImg.src = "brlogo.png"; // fallback
-      }
-    }
-
-    // Llamar cada 5 segundos
-    setInterval(fetchMetadata, 5000);
-
-    // Visualizador con Web Audio API
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const src = ctx.createMediaElementSource(audio);
-    const analyser = ctx.createAnalyser();
-    const canvas = document.getElementById("visualizer");
-    const ctx2d = canvas.getContext("2d");
-
-    src.connect(analyser);
-    analyser.connect(ctx.destination);
-    analyser.fftSize = 256;
-
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    function renderFrame() {
-      requestAnimationFrame(renderFrame);
-      analyser.getByteFrequencyData(dataArray);
-      ctx2d.fillStyle = "#000";
-      ctx2d.fillRect(0, 0, canvas.width, canvas.height);
-      const barWidth = (canvas.width / bufferLength) * 2.5;
-      let x = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = dataArray[i];
-        ctx2d.fillStyle = "#FF4444";
-        ctx2d.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
-        x += barWidth + 1;
-      }
-    }
-    renderFrame();
+    // Inicializar Luna (solo interfaz de metadatos)
+    $("#lunaradio").lunaradio({
+      radioname: "BELLOS RECUERDOS",
+      streamurl: "https://whmsonic.playerfullhd.com:7034",
+      streamtype: "shoutcast2",
+      shoutcastpath: "/stream",
+      shoutcastid: "1",
+      itunestoken: "1000lIPN",
+      metadatainterval: 5000,
+      coverimage: "js/brlogo.png"
+    });
   </script>
+
 </body>
 </html>
