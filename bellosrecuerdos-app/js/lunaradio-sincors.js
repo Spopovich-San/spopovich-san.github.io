@@ -1,45 +1,36 @@
-(function ($) {
-  $.fn.lunaradio = function (options) {
-    var settings = $.extend({
+// lunaradio-sincors.js modificado
+alert("✅ Cargando sincors modificado!"); // Para comprobar que es este
+
+(function($) {
+  $.fn.lunaradio = function(options) {
+    const settings = $.extend({
       streamurl: "",
+      streamtype: "shoutcast2",
+      shoutcastpath: "/stream",
       shoutcastid: "1",
-      itunestoken: "",
-      metadatainterval: 5000,
-      coverimage: "brlogo.png",
-      radioname: "Mi Radio"
+      itunestoken: "1000lIPN",
+      metadatainterval: 5000
     }, options);
 
-    var $meta = $(this);
+    const container = this;
 
-    function getMetadata() {
+    function updateMetadata() {
       $.ajax({
         url: settings.streamurl + "/stats?sid=" + settings.shoutcastid + "&json=1",
-        dataType: "json",
-        success: function (data) {
-          if (data && data.songtitle) {
-            $meta.text(data.songtitle);
-            searchCover(data.songtitle);
-          }
-        }
-      });
-    }
-
-    function searchCover(query) {
-      if (!settings.itunestoken) return;
-      $.ajax({
-        url: "https://itunes.apple.com/search",
         dataType: "jsonp",
-        data: { term: query, media: "music", limit: 1 },
-        success: function (resp) {
-          if (resp.results && resp.results[0]) {
-            $("#cover").attr("src", resp.results[0].artworkUrl100.replace("100x100bb.jpg", "300x300bb.jpg"));
+        success: function(data) {
+          if (data && data.songtitle) {
+            $("#song").text(data.songtitle);
           }
         }
       });
     }
 
-    setInterval(getMetadata, settings.metadatainterval);
-    getMetadata();
+    // Primera carga
+    updateMetadata();
+    // Intervalo
+    setInterval(updateMetadata, settings.metadatainterval);
+
     return this;
   };
-}(jQuery));
+})(jQuery);
