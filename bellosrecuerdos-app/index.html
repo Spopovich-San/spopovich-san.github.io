@@ -3,44 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
-  <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
+  <!-- jQuery desde tu repo -->
+  <script src="jquery-3.2.1.min.js"></script>
+  <!-- Script Luna modificado -->
   <script src="lunaradio-sincors.js"></script>
+
   <style>
     body {
       margin: 0;
+      padding: 0;
       background: #000;
       color: #fff;
       font-family: 'Bebas Neue', sans-serif;
       text-align: center;
     }
-    #logo {
+    #radioNative {
+      display: none;
+    }
+    #playToggle {
       margin-top: 20px;
-      width: 150px;
-    }
-    #station-name {
-      font-size: 2em;
-      margin: 10px 0;
-      color: #FF6767;
-    }
-    #metadata {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-    }
-    #cover {
-      width: 200px;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-    #play-btn {
-      margin-top: 20px;
-      width: 70px;
-      height: 70px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      border: none;
       background: #FF6767;
+      border: none;
       color: #fff;
-      font-size: 1.5em;
+      font-size: 20px;
       cursor: pointer;
     }
     canvas {
@@ -51,75 +39,75 @@
 </head>
 <body>
 
-  <img id="logo" src="brlogo.png" alt="Logo">
-  <div id="station-name">BELLOS RECUERDOS</div>
-  <div id="metadata">Cargando...</div>
-  <img id="cover" src="brlogo.png" alt="Carátula">
+  <h1>BELLOS RECUERDOS</h1>
+  <img id="cover" src="brlogo.png" width="200" style="border-radius:0;"><br>
+  <p id="song">Cargando canción...</p>
 
-  <button id="play-btn">▶</button>
+  <!-- Botón nativo -->
+  <button id="playToggle">Play</button>
 
-  <canvas id="visualizer" width="400" height="80"></canvas>
-
-  <!-- Audio nativo oculto -->
+  <!-- Reproductor nativo oculto -->
   <audio id="radioNative">
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
+  <!-- Visualizador -->
+  <canvas id="visualizer" width="500" height="100"></canvas>
+
   <script>
     const audio = document.getElementById("radioNative");
-    const playBtn = document.getElementById("play-btn");
+    const btn = document.getElementById("playToggle");
 
-    let isPlaying = false;
-    playBtn.addEventListener("click", () => {
-      if (isPlaying) {
-        audio.pause();
-        playBtn.textContent = "▶";
-        isPlaying = false;
-      } else {
+    // Botón Play/Stop
+    btn.addEventListener("click", () => {
+      if (audio.paused) {
         audio.play();
-        playBtn.textContent = "⏹";
-        isPlaying = true;
+        btn.textContent = "Stop";
+      } else {
+        audio.pause();
+        audio.currentTime = 0; // para que al reanudar vaya al vivo
+        btn.textContent = "Play";
       }
     });
 
     // Visualizador con Web Audio API
-    const canvas = document.getElementById("visualizer");
-    const ctx = canvas.getContext("2d");
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const analyser = audioCtx.createAnalyser();
-    const source = audioCtx.createMediaElementSource(audio);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = ctx.createMediaElementSource(audio);
+    const analyser = ctx.createAnalyser();
+    src.connect(analyser);
+    analyser.connect(ctx.destination);
     analyser.fftSize = 256;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
+    const canvas = document.getElementById("visualizer");
+    const canvasCtx = canvas.getContext("2d");
+
     function draw() {
       requestAnimationFrame(draw);
       analyser.getByteFrequencyData(dataArray);
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      canvasCtx.fillStyle = "#000";
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
       const barWidth = (canvas.width / bufferLength) * 2.5;
       let x = 0;
+
       for (let i = 0; i < bufferLength; i++) {
-        const barHeight = dataArray[i] / 2;
-        ctx.fillStyle = "#FF6767";
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        const barHeight = dataArray[i];
+        canvasCtx.fillStyle = "#FF6767";
+        canvasCtx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
         x += barWidth + 1;
       }
     }
     draw();
 
-    // Iniciar lunaradio solo para metadatos
-    $("#metadata").lunaradio({
-      streamurl: "https://whmsonic.playerfullhd.com:7034",
-      shoutcastid: "1",
-      itunestoken: "1000lIPN",
-      metadatainterval: 5000,
-      coverimage: "brlogo.png",
-      radioname: "BELLOS RECUERDOS"
+    // Forzar autoplay
+    window.addEventListener("load", () => {
+      audio.play().catch(() => {
+        console.log("Autoplay bloqueado, requiere interacción");
+      });
     });
   </script>
+
 </body>
 </html>
