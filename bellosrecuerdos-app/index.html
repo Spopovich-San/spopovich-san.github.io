@@ -3,79 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
-  <link rel="stylesheet" href="css/styles.css">
 
   <!-- jQuery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
-  <!-- LunaRadio -->
-  <script src="js/lunaradio-sincors.js"></script>
+  <script src="https://spopovich-san.github.io/bellosrecuerdos-app/js/jquery-3.2.1.min.js"></script>
+
+  <!-- LunaRadio solo para interfaz -->
+  <script src="https://spopovich-san.github.io/bellosrecuerdos-app/js/lunaradio-sincors.js"></script>
+
+  <style>
+    body {
+      margin:0;
+      padding:0;
+      background:#000;
+      color:#fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #lunaradio {
+      width: 100%;
+      height: 80vh;
+    }
+    #controls {
+      margin-top: 20px;
+    }
+    button {
+      background: #FF6767;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 30px;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #e55555;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Contenedor del reproductor -->
-  <div id="lunaradio"></div>
+  <div id="lunaradio">Cargando reproductor...</div>
 
-  <!-- Reproductor nativo oculto -->
-  <audio id="radioNative" autoplay loop>
-    <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
-  </audio>
+  <!-- Audio nativo oculto -->
+  <audio id="radioNative"></audio>
 
-  <!-- Controles propios -->
-  <div id="customControls">
-    <button id="playBtn">▶️ Play / ⏸️ Pause</button>
-    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+  <!-- Botón de control -->
+  <div id="controls">
+    <button id="playBtn">▶️ Reproducir</button>
   </div>
 
   <script>
-  // Inicializamos LunaPlayer SOLO para visualización y metadatos
+  // LunaRadio solo para info visual (sin autoplay ni controles internos)
   $("#lunaradio").lunaradio({
     userinterface: "big", 
-    backgroundcolor: "#000000",
-    fontcolor: "#ffffff",
-    hightlightcolor: "#FF6767", 
-    fontname: "Bebas Neue", 
-    googlefont: "Bebas+Neue&display=swap", 
-    fontratio: "0.4", 
     radioname: "BELLOS RECUERDOS", 
-    scroll: "true",
-    coverimage: "img/brlogo.png",
-    onlycoverimage: "false",
-    coverstyle: "square",
-    usevisualizer: "real", 
-    visualizertype: "0", 
     streamurl: "https://whmsonic.playerfullhd.com:7034",
     streamtype: "shoutcast2", 
     shoutcastpath: "/stream",
     shoutcastid: "1", 
-    itunestoken: "1000lIPN", 
-    metadatainterval: "5000", 
-    volume: "80",
-    autoplay: "false"
+    metadatainterval: "5000",
+    coverimage: "https://spopovich-san.github.io/bellosrecuerdos-app/img/brlogo.png",
+    autoplay: "false",
+    volume: "0" // silenciado dentro de Luna
   });
 
-  // Controles del audio nativo
+  // Control del audio nativo
   const audio = document.getElementById("radioNative");
   const playBtn = document.getElementById("playBtn");
-  const volumeSlider = document.getElementById("volumeSlider");
+  const streamUrl = "https://whmsonic.playerfullhd.com:7034/stream";
+
+  let isPlaying = false;
 
   playBtn.addEventListener("click", () => {
-    if (audio.paused) {
-      audio.play();
-      playBtn.textContent = "⏸️ Pause";
+    if (!isPlaying) {
+      audio.src = streamUrl; // siempre carga desde el streaming en vivo
+      audio.play().then(() => {
+        isPlaying = true;
+        playBtn.textContent = "⏹️ Detener";
+      }).catch(err => {
+        console.log("Error al reproducir:", err);
+      });
     } else {
       audio.pause();
-      playBtn.textContent = "▶️ Play";
+      audio.src = ""; // liberar buffer para que no guarde caché
+      isPlaying = false;
+      playBtn.textContent = "▶️ Reproducir";
     }
-  });
-
-  volumeSlider.addEventListener("input", () => {
-    audio.volume = volumeSlider.value;
-  });
-
-  // Autoplay controlado
-  audio.volume = 0.8;
-  audio.play().catch(() => {
-    console.log("Autoplay bloqueado, se requiere interacción");
   });
   </script>
 
