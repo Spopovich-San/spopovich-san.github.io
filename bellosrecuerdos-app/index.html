@@ -1,41 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Bellos Recuerdos Radio</title>
+  <link rel="stylesheet" href="css/styles.css">
 
-<script src="js/jquery-3.2.1.min.js"></script>
-<script src="js/lunaradio-sincors.js"></script>
+  <!-- jQuery -->
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <!-- LunaRadio -->
+  <script src="js/lunaradio-sincors.js"></script>
+</head>
+<body>
 
-<div id="lunaradio" style="width:100%; height:100%;background: #000000 url() bottom / cover no-repeat;">loading...</div>			
+  <!-- Contenedor del reproductor -->
+  <div id="lunaradio"></div>
 
-<script>
-$("#lunaradio").lunaradio({
-userinterface: "big", 
-backgroundcolor: "",
-fontcolor: "#ffffff",
-hightlightcolor: "#FF6767", 
-fontname: "Bebas Neue", 
-googlefont: "Bebas+Neue&display=swap", 
-fontratio: "0.4", 
-radioname: "BELLOS RECUERDOS", 
-scroll: "true",
-coverimage: "js/brlogo.png",
-onlycoverimage: "false",
-coverstyle: "square",
-usevisualizer: "real", 
-visualizertype: "0", 
-metadatatechnic: "",
-ownmetadataurl: "", 
-streamurl: "https://whmsonic.playerfullhd.com:7034", 
-streamtype: "shoutcast2", 
-icecastmountpoint: "",
-shoutcastpath: "/stream",
-shoutcastid: "1", 
-streamsuffix: "", 
-radionomyid: "", 
-radionomyapikey: "",
-radiojarid: "",  
-radiocoid: "",
-itunestoken: "1000lIPN", 
-metadatainterval: "5000", 
-volume: "80",
-debug: "false",
-autoplay: "true"
-});
-</script>
+  <!-- Reproductor nativo oculto -->
+  <audio id="radioNative" autoplay loop>
+    <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
+  </audio>
+
+  <!-- Controles propios -->
+  <div id="customControls">
+    <button id="playBtn">▶️ Play / ⏸️ Pause</button>
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+  </div>
+
+  <script>
+  // Inicializamos LunaPlayer SOLO para visualización y metadatos
+  $("#lunaradio").lunaradio({
+    userinterface: "big", 
+    backgroundcolor: "#000000",
+    fontcolor: "#ffffff",
+    hightlightcolor: "#FF6767", 
+    fontname: "Bebas Neue", 
+    googlefont: "Bebas+Neue&display=swap", 
+    fontratio: "0.4", 
+    radioname: "BELLOS RECUERDOS", 
+    scroll: "true",
+    coverimage: "img/brlogo.png",
+    onlycoverimage: "false",
+    coverstyle: "square",
+    usevisualizer: "real", 
+    visualizertype: "0", 
+    streamurl: "https://whmsonic.playerfullhd.com:7034",
+    streamtype: "shoutcast2", 
+    shoutcastpath: "/stream",
+    shoutcastid: "1", 
+    itunestoken: "1000lIPN", 
+    metadatainterval: "5000", 
+    volume: "80",
+    autoplay: "false"
+  });
+
+  // Controles del audio nativo
+  const audio = document.getElementById("radioNative");
+  const playBtn = document.getElementById("playBtn");
+  const volumeSlider = document.getElementById("volumeSlider");
+
+  playBtn.addEventListener("click", () => {
+    if (audio.paused) {
+      audio.play();
+      playBtn.textContent = "⏸️ Pause";
+    } else {
+      audio.pause();
+      playBtn.textContent = "▶️ Play";
+    }
+  });
+
+  volumeSlider.addEventListener("input", () => {
+    audio.volume = volumeSlider.value;
+  });
+
+  // Autoplay controlado
+  audio.volume = 0.8;
+  audio.play().catch(() => {
+    console.log("Autoplay bloqueado, se requiere interacción");
+  });
+  </script>
+
+</body>
+</html>
