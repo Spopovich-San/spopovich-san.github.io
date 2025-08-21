@@ -5,99 +5,103 @@
   <title>Bellos Recuerdos Radio</title>
 
   <!-- jQuery -->
-  <script src="https://spopovich-san.github.io/bellosrecuerdos-app/js/jquery-3.2.1.min.js"></script>
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <!-- Luna modificado (sin controles) -->
+  <script src="js/lunaradio-sincors.js"></script>
 
-  <!-- LunaRadio solo para interfaz -->
-  <script src="https://spopovich-san.github.io/bellosrecuerdos-app/js/lunaradio-sincors.js"></script>
+  <!-- Fuente -->
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
 
   <style>
     body {
-      margin:0;
-      padding:0;
-      background:#000;
-      color:#fff;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #000 url('js/consola.png') bottom / cover no-repeat;
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
       text-align: center;
     }
     #lunaradio {
       width: 100%;
-      height: 80vh;
+      height: calc(100vh - 100px);
     }
+    /* Botón nativo Play/Stop */
     #controls {
-      margin-top: 20px;
+      margin-top: 15px;
     }
-    button {
-      background: #FF6767;
+    #playBtn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
       border: none;
-      padding: 12px 20px;
-      border-radius: 30px;
+      background: #FF6767;
       color: #fff;
-      font-size: 18px;
+      font-size: 28px;
       cursor: pointer;
-    }
-    button:hover {
-      background: #e55555;
     }
   </style>
 </head>
 <body>
 
+  <!-- Contenedor del reproductor visual -->
   <div id="lunaradio">Cargando reproductor...</div>
 
-  <!-- Audio nativo oculto -->
-  <audio id="radioNative"></audio>
+  <!-- Reproductor nativo oculto -->
+  <audio id="radioNative">
+    <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
+  </audio>
 
-  <!-- Botón de control -->
+  <!-- Controles nativos -->
   <div id="controls">
-    <button id="playBtn">▶️ Reproducir</button>
+    <button id="playBtn">▶</button>
   </div>
 
   <script>
-  // LunaRadio solo para info visual (sin autoplay ni controles internos)
-  $("#lunaradio").lunaradio({
-    userinterface: "big",
-    backgroundcolor: "",
-    fontcolor: "#ffffff",
-    hightlightcolor: "#FF6767", 
-    fontname: "Bebas Neue", 
-    googlefont: "Bebas+Neue&display=swap", 
-    fontratio: "0.4",  
-    radioname: "BELLOS RECUERDOS", 
-    streamurl: "https://whmsonic.playerfullhd.com:7034",
-    streamtype: "shoutcast2", 
-    shoutcastpath: "/stream",
-    shoutcastid: "1", 
-    metadatainterval: "5000",
-    coverimage: "https://spopovich-san.github.io/bellosrecuerdos-app/img/brlogo.png",
-    coverstyle: "square",
-    autoplay: "false",
-    volume: "0" // silenciado dentro de Luna
-  });
+    // Inicializar Luna solo como visual
+    $("#lunaradio").lunaradio({
+      userinterface: "big",
+      backgroundcolor: "",
+      fontcolor: "#ffffff",
+      hightlightcolor: "#FF6767",
+      fontname: "Bebas Neue",
+      googlefont: "Bebas+Neue&display=swap",
+      fontratio: "0.4",
+      radioname: "BELLOS RECUERDOS",
+      scroll: "true",
+      coverimage: "js/brlogo.png",
+      onlycoverimage: "false",
+      coverstyle: "square",
+      usevisualizer: "real",
+      visualizertype: "0",
+      streamurl: "https://whmsonic.playerfullhd.com:7034",
+      streamtype: "shoutcast2",
+      shoutcastpath: "/stream",
+      shoutcastid: "1",
+      itunestoken: "1000lIPN",
+      metadatainterval: "5000",
+      volume: "80",
+      autoplay: "false"
+    });
 
-  // Control del audio nativo
-  const audio = document.getElementById("radioNative");
-  const playBtn = document.getElementById("playBtn");
-  const streamUrl = "https://whmsonic.playerfullhd.com:7034/stream";
+    // Control del audio nativo
+    const audio = document.getElementById("radioNative");
+    const playBtn = document.getElementById("playBtn");
+    let isPlaying = false;
 
-  let isPlaying = false;
-
-  playBtn.addEventListener("click", () => {
-    if (!isPlaying) {
-      audio.src = streamUrl; // siempre carga desde el streaming en vivo
-      audio.play().then(() => {
-        isPlaying = true;
-        playBtn.textContent = "⏹️ Detener";
-      }).catch(err => {
-        console.log("Error al reproducir:", err);
-      });
-    } else {
-      audio.pause();
-      audio.src = ""; // liberar buffer para que no guarde caché
-      isPlaying = false;
-      playBtn.textContent = "▶️ Reproducir";
-    }
-  });
+    playBtn.addEventListener("click", () => {
+      if (!isPlaying) {
+        audio.src = "https://whmsonic.playerfullhd.com:7034/stream";
+        audio.play().then(() => {
+          playBtn.textContent = "⏹"; // Cambia a stop
+          isPlaying = true;
+        }).catch(err => console.log("Autoplay bloqueado:", err));
+      } else {
+        audio.pause();
+        audio.currentTime = 0; // Reinicia para que vuelva en vivo
+        playBtn.textContent = "▶";
+        isPlaying = false;
+      }
+    });
   </script>
-
 </body>
 </html>
