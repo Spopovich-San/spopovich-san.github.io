@@ -3,104 +3,122 @@
 <head>
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
-
-  <!-- jQuery -->
-  <script src="js/jquery-3.2.1.min.js"></script>
-  <!-- Luna modificado (sin controles) -->
-  <script src="js/lunaradio-sincors.js"></script>
-
-  <!-- Fuente -->
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-
+  <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
+  <script src="lunaradio-sincors.js"></script>
   <style>
     body {
       margin: 0;
-      padding: 0;
-      background: #000 url('js/consola.png') bottom / cover no-repeat;
+      background: #000;
       color: #fff;
       font-family: 'Bebas Neue', sans-serif;
       text-align: center;
     }
-    #lunaradio {
-      width: 100%;
-      height: calc(100vh - 100px);
+    #logo {
+      margin-top: 20px;
+      width: 150px;
     }
-    /* Botón nativo Play/Stop */
-    #controls {
-      margin-top: 15px;
+    #station-name {
+      font-size: 2em;
+      margin: 10px 0;
+      color: #FF6767;
     }
-    #playBtn {
+    #metadata {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+    }
+    #cover {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    #play-btn {
+      margin-top: 20px;
       width: 70px;
       height: 70px;
       border-radius: 50%;
       border: none;
       background: #FF6767;
       color: #fff;
-      font-size: 28px;
+      font-size: 1.5em;
       cursor: pointer;
+    }
+    canvas {
+      display: block;
+      margin: 20px auto;
     }
   </style>
 </head>
 <body>
 
-  <!-- Contenedor del reproductor visual -->
-  <div id="lunaradio">Cargando reproductor...</div>
+  <img id="logo" src="brlogo.png" alt="Logo">
+  <div id="station-name">BELLOS RECUERDOS</div>
+  <div id="metadata">Cargando...</div>
+  <img id="cover" src="brlogo.png" alt="Carátula">
 
-  <!-- Reproductor nativo oculto -->
+  <button id="play-btn">▶</button>
+
+  <canvas id="visualizer" width="400" height="80"></canvas>
+
+  <!-- Audio nativo oculto -->
   <audio id="radioNative">
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
-  <!-- Controles nativos -->
-  <div id="controls">
-    <button id="playBtn">▶</button>
-  </div>
-
   <script>
-    // Inicializar Luna solo como visual
-    $("#lunaradio").lunaradio({
-      userinterface: "big",
-      backgroundcolor: "",
-      fontcolor: "#ffffff",
-      hightlightcolor: "#FF6767",
-      fontname: "Bebas Neue",
-      googlefont: "Bebas+Neue&display=swap",
-      fontratio: "0.4",
-      radioname: "BELLOS RECUERDOS",
-      scroll: "true",
-      coverimage: "js/brlogo.png",
-      onlycoverimage: "false",
-      coverstyle: "square",
-      usevisualizer: "real",
-      visualizertype: "0",
-      streamurl: "https://whmsonic.playerfullhd.com:7034",
-      streamtype: "shoutcast2",
-      shoutcastpath: "/stream",
-      shoutcastid: "1",
-      itunestoken: "1000lIPN",
-      metadatainterval: "5000",
-      volume: "80",
-      autoplay: "false"
-    });
-
-    // Control del audio nativo
     const audio = document.getElementById("radioNative");
-    const playBtn = document.getElementById("playBtn");
-    let isPlaying = false;
+    const playBtn = document.getElementById("play-btn");
 
+    let isPlaying = false;
     playBtn.addEventListener("click", () => {
-      if (!isPlaying) {
-        audio.src = "https://whmsonic.playerfullhd.com:7034/stream";
-        audio.play().then(() => {
-          playBtn.textContent = "⏹"; // Cambia a stop
-          isPlaying = true;
-        }).catch(err => console.log("Autoplay bloqueado:", err));
-      } else {
+      if (isPlaying) {
         audio.pause();
-        audio.currentTime = 0; // Reinicia para que vuelva en vivo
         playBtn.textContent = "▶";
         isPlaying = false;
+      } else {
+        audio.play();
+        playBtn.textContent = "⏹";
+        isPlaying = true;
       }
+    });
+
+    // Visualizador con Web Audio API
+    const canvas = document.getElementById("visualizer");
+    const ctx = canvas.getContext("2d");
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const analyser = audioCtx.createAnalyser();
+    const source = audioCtx.createMediaElementSource(audio);
+    source.connect(analyser);
+    analyser.connect(audioCtx.destination);
+    analyser.fftSize = 256;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function draw() {
+      requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArray);
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const barWidth = (canvas.width / bufferLength) * 2.5;
+      let x = 0;
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = dataArray[i] / 2;
+        ctx.fillStyle = "#FF6767";
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+        x += barWidth + 1;
+      }
+    }
+    draw();
+
+    // Iniciar lunaradio solo para metadatos
+    $("#metadata").lunaradio({
+      streamurl: "https://whmsonic.playerfullhd.com:7034",
+      shoutcastid: "1",
+      itunestoken: "1000lIPN",
+      metadatainterval: 5000,
+      coverimage: "brlogo.png",
+      radioname: "BELLOS RECUERDOS"
     });
   </script>
 </body>
