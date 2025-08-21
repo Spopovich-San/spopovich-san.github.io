@@ -55,7 +55,13 @@
   <script>
   // LunaRadio solo para info visual (sin autoplay ni controles internos)
   $("#lunaradio").lunaradio({
-    userinterface: "big", 
+    userinterface: "big",
+    backgroundcolor: "",
+    fontcolor: "#ffffff",
+    hightlightcolor: "#FF6767", 
+    fontname: "Bebas Neue", 
+    googlefont: "Bebas+Neue&display=swap", 
+    fontratio: "0.4",  
     radioname: "BELLOS RECUERDOS", 
     streamurl: "https://whmsonic.playerfullhd.com:7034",
     streamtype: "shoutcast2", 
@@ -63,6 +69,7 @@
     shoutcastid: "1", 
     metadatainterval: "5000",
     coverimage: "https://spopovich-san.github.io/bellosrecuerdos-app/img/brlogo.png",
+    coverstyle: "square",
     autoplay: "false",
     volume: "0" // silenciado dentro de Luna
   });
