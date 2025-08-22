@@ -5,47 +5,8 @@
   <title>Bellos Recuerdos Radio</title>
   <!-- jQuery -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
-  <!-- Tu lunaradio modificado -->
-  <script src="js/lunaradio-sincors.js"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #fff;
-      font-family: 'Bebas Neue', sans-serif;
-      text-align: center;
-    }
-    #station {
-      font-size: 32px;
-      margin-top: 20px;
-    }
-    #cover {
-      width: 250px;
-      height: 250px;
-      margin: 20px auto;
-      border-radius: 8px; /* cuadrada con esquinas suaves */
-      display: block;
-    }
-    #songtitle {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    #playbtn {
-      margin-top: 20px;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 30px;
-      background: #FF6767;
-      color: #fff;
-      font-size: 18px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    #playbtn:hover {
-      background: #ff3c3c;
-    }
-  </style>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -61,37 +22,8 @@
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
-  <script>
-    const audio = document.getElementById("radioNative");
-    const playBtn = document.getElementById("playbtn");
-
-    audio.volume = 0.8;
-    audio.play().catch(() => console.log("Autoplay bloqueado"));
-
-    // Función para Play/Stop (stop = recargar el stream para que siga en vivo)
-    playBtn.addEventListener("click", () => {
-      if (!audio.paused) {
-        audio.pause();
-        playBtn.textContent = "▶️ Reproducir";
-      } else {
-        audio.load(); // reset para sincronizar al vivo
-        audio.play();
-        playBtn.textContent = "⏸️ Pausar";
-      }
-    });
-
-    // Inicializar Luna (solo interfaz de metadatos)
-    $("#lunaradio").lunaradio({
-      radioname: "BELLOS RECUERDOS",
-      streamurl: "https://whmsonic.playerfullhd.com:7034",
-      streamtype: "shoutcast2",
-      shoutcastpath: "/stream",
-      shoutcastid: "1",
-      itunestoken: "1000lIPN",
-      metadatainterval: 5000,
-      coverimage: "js/brlogo.png"
-    });
-  </script>
-
+  <!-- Scripts -->
+  <script src="js/lunaradio-sincors.js"></script>
+  <script src="js/player.js"></script>
 </body>
 </html>
