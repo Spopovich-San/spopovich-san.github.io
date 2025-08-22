@@ -3,35 +3,40 @@ body {
   padding: 0;
   background: #000;
   color: #fff;
-  font-family: Arial, sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   text-align: center;
 }
 
-#lunaradio {
-  width: 100%;
-  height: 70vh;
-  background: #000 url('../img/consola.png') bottom / cover no-repeat;
-}
-
-#customControls {
+#station {
+  font-size: 32px;
   margin-top: 20px;
 }
 
-#playBtn {
-  background: #FF6767;
-  color: white;
+#cover {
+  width: 250px;
+  height: 250px;
+  margin: 20px auto;
+  border-radius: 8px; /* cuadrada con esquinas suaves */
+  display: block;
+}
+
+#songtitle {
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+#playbtn {
+  margin-top: 20px;
+  padding: 12px 25px;
   border: none;
-  padding: 10px 20px;
-  border-radius: 50px;
+  border-radius: 30px;
+  background: #FF6767;
+  color: #fff;
+  font-size: 18px;
   cursor: pointer;
-  font-size: 16px;
+  transition: 0.3s;
 }
 
-#playBtn:hover {
-  background: #ff4444;
-}
-
-#volumeSlider {
-  width: 60%;
-  margin-top: 15px;
+#playbtn:hover {
+  background: #ff3c3c;
 }
