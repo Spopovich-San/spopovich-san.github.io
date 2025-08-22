@@ -3,27 +3,88 @@
 <head>
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
-  <!-- jQuery -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
-  <!-- Estilos -->
-  <link rel="stylesheet" href="css/style.css">
+  <script src="js/lunaradio-sincors.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+    }
+    #lunaradio {
+      width: 100%;
+      height: 100vh;
+      background: #000 url("js/consola.png") bottom / cover no-repeat;
+    }
+    /* botón Play/Stop */
+    #playbtn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 25px;
+      border: none;
+      border-radius: 25px;
+      background: #FF6767;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-  <div id="station">BELLOS RECUERDOS</div>
-  <img id="cover" src="js/brlogo.png" alt="Carátula">
-  <div id="songtitle">Cargando canción...</div>
+  <!-- Interfaz Luna -->
+  <div id="lunaradio">Cargando...</div>
 
-  <!-- Botón Play/Stop -->
-  <button id="playbtn">⏸️ Pausar</button>
-
-  <!-- Reproductor nativo (oculto) -->
+  <!-- Reproductor nativo oculto -->
   <audio id="radioNative" autoplay>
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
-  <!-- Scripts -->
-  <script src="js/lunaradio-sincors.js"></script>
-  <script src="js/player.js"></script>
+  <!-- Botón Play/Stop nativo -->
+  <button id="playbtn">⏸️ Pausar</button>
+
+  <script>
+    // Inicia Luna SOLO para mostrar UI (sin reproducir audio interno)
+    $("#lunaradio").lunaradio({
+      userinterface: "big", 
+      backgroundcolor: "#000000",
+      fontcolor: "#ffffff",
+      hightlightcolor: "#FF6767", 
+      fontname: "Bebas Neue", 
+      googlefont: "Bebas+Neue&display=swap", 
+      fontratio: "0.4", 
+      radioname: "BELLOS RECUERDOS", 
+      scroll: "true",
+      coverimage: "js/brlogo.png",
+      onlycoverimage: "false",
+      coverstyle: "square",
+      // ↓↓↓ Stream sigue para que saque metadatos y portada
+      streamurl: "https://whmsonic.playerfullhd.com:7034",
+      streamtype: "shoutcast2", 
+      shoutcastpath: "/stream",
+      shoutcastid: "1", 
+      itunestoken: "1000lIPN", 
+      metadatainterval: "5000", 
+      autoplay: "false"
+    });
+
+    // Control del audio nativo
+    const audio = document.getElementById("radioNative");
+    const btn = document.getElementById("playbtn");
+
+    btn.addEventListener("click", () => {
+      if (!audio.paused) {
+        audio.pause();
+        btn.textContent = "▶️ Reproducir";
+      } else {
+        audio.load(); // reset -> para que vuelva en vivo
+        audio.play();
+        btn.textContent = "⏸️ Pausar";
+      }
+    });
+  </script>
 </body>
 </html>
