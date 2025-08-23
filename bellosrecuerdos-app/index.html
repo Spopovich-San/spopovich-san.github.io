@@ -1,41 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Bellos Recuerdos Radio</title>
+  <script src="js/jquery-3.2.1.min.js"></script>
+  <script src="js/lunaradio-sincors.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      overflow: hidden;
+    }
+    #lunaradio {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      text-align: center;
+    }
+    /* Fondo difuminado */
+    #luna-bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      filter: blur(12px) brightness(0.6);
+      z-index: 1;
+    }
+    /* Contenido principal */
+    #luna-content {
+      position: relative;
+      z-index: 2;
+    }
+    #luna-cover {
+      width: 250px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
+    }
+    #luna-title {
+      color: #FF6767;
+      font-size: 34px;
+      margin: 15px 0 5px 0;
+    }
+    #luna-track {
+      color: #fff;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="lunaradio">
+    <div id="luna-bg"></div>
+    <div id="luna-content">
+      <img id="luna-cover" src="js/brlogo.png" alt="cover">
+      <h1 id="luna-title">BELLOS RECUERDOS</h1>
+      <h2 id="luna-track">Cargando canción...</h2>
+    </div>
+  </div>
 
-<script src="js/jquery-3.2.1.min.js"></script>
-<script src="js/lunaradio-sincors.js"></script>
-
-<div id="lunaradio" style="width:100%; height:100%;background: #000000 url(js/ bottom / cover no-repeat;">loading...</div>			
-
-<script>
-$("#lunaradio").lunaradio({
-userinterface: "big", 
-backgroundcolor: "",
-fontcolor: "#ffffff",
-hightlightcolor: "#FF6767", 
-fontname: "Bebas Neue", 
-googlefont: "Bebas+Neue&display=swap", 
-fontratio: "0.4", 
-radioname: "BELLOS RECUERDOS", 
-scroll: "true",
-coverimage: "js/logo.jpg",
-onlycoverimage: "false",
-coverstyle: "square",
-usevisualizer: "real", 
-visualizertype: "3", 
-metadatatechnic: "",
-ownmetadataurl: "", 
-streamurl: "https://whmsonic.playerfullhd.com:7034", 
-streamtype: "shoutcast2", 
-icecastmountpoint: "",
-shoutcastpath: "/stream",
-shoutcastid: "1", 
-streamsuffix: "", 
-radionomyid: "", 
-radionomyapikey: "",
-radiojarid: "",  
-radiocoid: "",
-itunestoken: "1000lIPN", 
-metadatainterval: "5000", 
-volume: "80",
-debug: "false",
-autoplay: "true"
-});
-</script>
+  <script>
+    $("#lunaradio").lunaradio({
+      radioname: "BELLOS RECUERDOS",
+      coverimage: "js/brlogo.png",
+      coverstyle: "square",
+      streamurl: "https://whmsonic.playerfullhd.com:7034",
+      streamtype: "shoutcast2",
+      shoutcastpath: "/stream",
+      shoutcastid: "1",
+      itunestoken: "1000lIPN",
+      metadatainterval: "5000",
+      autoplay: "true"
+    });
+  </script>
+</body>
+</html>
