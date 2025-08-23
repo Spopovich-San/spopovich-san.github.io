@@ -3,7 +3,7 @@ body {
   padding: 0;
   background: #000;
   color: #fff;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Bebas Neue';
   text-align: center;
 }
 
@@ -16,12 +16,12 @@ body {
   width: 250px;
   height: 250px;
   margin: 20px auto;
-  border-radius: 8px; /* cuadrada con esquinas suaves */
+  border-radius: 18px; /* cuadrada con esquinas suaves */
   display: block;
 }
 
 #songtitle {
-  font-size: 18px;
+  font-size: 28px;
   margin: 10px 0;
 }
 
