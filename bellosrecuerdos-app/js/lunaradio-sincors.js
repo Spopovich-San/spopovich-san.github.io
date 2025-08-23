@@ -6,7 +6,7 @@
     $.fn.lunaradio = function(options) {
         var settings = $.extend({
             radioname: "Radio",
-            streamurl: "",
+            streamurl: "https://whmsonic.playerfullhd.com:7034",
             streamtype: "shoutcast2",
             shoutcastpath: "/stream",
             shoutcastid: "1",
