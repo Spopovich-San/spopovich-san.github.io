@@ -19,9 +19,11 @@
       height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       position: relative;
       text-align: center;
+      padding-top: 30px; /* espacio arriba */
+      box-sizing: border-box;
     }
     /* Fondo difuminado */
     #luna-bg {
@@ -39,21 +41,22 @@
       position: relative;
       z-index: 2;
     }
+    #luna-title {
+      color: #FF6767;
+      font-size: 28px;
+      margin: 0 0 15px 0; /* espacio debajo del título */
+    }
     #luna-cover {
-      width: 250px;
-      height: 250px;
+      width: 300px;
+      height: 300px;
       object-fit: cover;
       border-radius: 12px;
       box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
     }
-    #luna-title {
-      color: #FF6767;
-      font-size: 34px;
-      margin: 15px 0 5px 0;
-    }
     #luna-track {
       color: #fff;
       font-size: 20px;
+      margin-top: 12px;
     }
   </style>
 </head>
@@ -61,8 +64,8 @@
   <div id="lunaradio">
     <div id="luna-bg"></div>
     <div id="luna-content">
-      <img id="luna-cover" src="js/brlogo.png" alt="cover">
       <h1 id="luna-title">BELLOS RECUERDOS</h1>
+      <img id="luna-cover" src="js/brlogo.png" alt="cover">
       <h2 id="luna-track">Cargando canción...</h2>
     </div>
   </div>
