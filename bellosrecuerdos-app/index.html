@@ -1,95 +1,41 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Bellos Recuerdos Radio</title>
-  <script src="js/jquery-3.2.1.min.js"></script>
-  <script src="js/lunaradio-sincors.js"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #fff;
-      font-family: 'Bebas Neue', sans-serif;
-    }
 
-    /* Botón nativo redondo */
-    #playBtn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #FF6767;
-      border: none;
-      color: white;
-      font-size: 30px;
-      cursor: pointer;
-      box-shadow: 0 0 15px rgba(255, 103, 103, 0.6);
-    }
-    #playBtn:active {
-      background: #cc5050;
-    }
-  </style>
-</head>
-<body>
-  <!-- Contenedor de Luna -->
-  <div id="lunaradio" style="width:100%; height:100vh; background:#000 url('js/consola.png') bottom / cover no-repeat;">
-    Cargando reproductor...
-  </div>
+<script src="js/jquery-3.2.1.min.js"></script>
+<script src="js/lunaradio-sincors.js"></script>
 
-  <!-- Reproductor nativo oculto -->
-  <audio id="radioNative">
-    <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
-  </audio>
+<div id="lunaradio" style="width:100%; height:100%;background: #000000 url(js/enefeb.gif) bottom / cover no-repeat;">loading...</div>			
 
-  <!-- Botón nativo -->
-  <button id="playBtn">▶</button>
-
-  <script>
-    // Inicializar Luna solo para interfaz (logo + metadatos + portada)
-    $("#lunaradio").lunaradio({
-      userinterface: "big",
-      backgroundcolor: "#000000",
-      fontcolor: "#ffffff",
-      hightlightcolor: "#FF6767",
-      fontname: "Bebas Neue",
-      googlefont: "Bebas+Neue&display=swap",
-      fontratio: "0.4",
-      radioname: "BELLOS RECUERDOS",
-      scroll: "true",
-      coverimage: "js/brlogo.png",
-      onlycoverimage: "false",
-      coverstyle: "square",
-      usevisualizer: "false",
-      streamurl: "https://whmsonic.playerfullhd.com:7034",
-      streamtype: "shoutcast2",
-      shoutcastpath: "/stream",
-      shoutcastid: "1",
-      itunestoken: "1000lIPN",
-      metadatainterval: "5000",
-      volume: "80",
-      autoplay: "false"
-    });
-
-    // Control nativo
-    const audio = document.getElementById("radioNative");
-    const btn = document.getElementById("playBtn");
-
-    btn.addEventListener("click", () => {
-      if (audio.paused) {
-        audio.src = "https://whmsonic.playerfullhd.com:7034/stream"; // Reinicia streaming
-        audio.play().catch(() => {});
-        btn.textContent = "❚❚"; // icono pausa
-      } else {
-        audio.pause();
-        audio.currentTime = 0; // stop real
-        btn.textContent = "▶";
-      }
-    });
-  </script>
-</body>
-</html>
+<script>
+$("#lunaradio").lunaradio({
+userinterface: "big", 
+backgroundcolor: "",
+fontcolor: "#ffffff",
+hightlightcolor: "#FF6767", 
+fontname: "Bebas Neue", 
+googlefont: "Bebas+Neue&display=swap", 
+fontratio: "0.4", 
+radioname: "CANAL 18 RADIO", 
+scroll: "true",
+coverimage: "js/logo.jpg",
+onlycoverimage: "false",
+coverstyle: "square",
+usevisualizer: "real", 
+visualizertype: "3", 
+metadatatechnic: "",
+ownmetadataurl: "", 
+streamurl: "https://stream.radiohd.es:7104", 
+streamtype: "shoutcast2", 
+icecastmountpoint: "",
+shoutcastpath: "/stream",
+shoutcastid: "1", 
+streamsuffix: "", 
+radionomyid: "", 
+radionomyapikey: "",
+radiojarid: "",  
+radiocoid: "",
+itunestoken: "1000lIPN", 
+metadatainterval: "5000", 
+volume: "80",
+debug: "false",
+autoplay: "true"
+});
+</script>
