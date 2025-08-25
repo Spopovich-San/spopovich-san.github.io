@@ -7,7 +7,7 @@
   <!-- jQuery -->
   <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
 
-  <!-- lunaradio modificado -->
+  <!-- Lunaradio modificado -->
   <script src="js/lunaradio-sincors.js"></script>
 
   <style>
@@ -21,7 +21,6 @@
       overflow: hidden;
     }
 
-    /* Fondo difuminado */
     #background-blur {
       position: fixed;
       top: 0;
@@ -35,7 +34,6 @@
       transition: background-image 1s ease-in-out;
     }
 
-    /* Contenedor central */
     #player-container {
       display: flex;
       flex-direction: column;
@@ -44,16 +42,8 @@
       height: 100vh;
     }
 
-    #station-title {
-      font-size: 36px;
-      margin-bottom: 5px;
-    }
-
-    #station-subtitle {
-      font-size: 18px;
-      font-style: italic;
-      margin-bottom: 20px;
-    }
+    #station-title { font-size: 36px; margin-bottom: 5px; }
+    #station-subtitle { font-size: 18px; font-style: italic; margin-bottom: 20px; }
 
     #cover {
       width: 250px;
@@ -64,12 +54,8 @@
       transition: opacity 0.5s ease-in-out;
     }
 
-    #luna-track {
-      margin-top: 20px;
-      font-size: 20px;
-    }
+    #luna-track { margin-top: 20px; font-size: 20px; }
 
-    /* Botón Play/Stop */
     #playButton {
       margin-top: 25px;
       width: 80px;
@@ -83,9 +69,7 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    #playButton:hover {
-      background: #ff4444;
-    }
+    #playButton:hover { background: #ff4444; }
   </style>
 </head>
 <body>
@@ -99,11 +83,9 @@
     <img id="cover" src="js/brlogo.png" alt="Carátula">
     <div id="luna-track"></div>
 
-    <!-- Botón Play/Stop -->
     <button id="playButton">▶</button>
   </div>
 
-  <!-- Reproductor nativo oculto -->
   <audio id="radioNative" preload="auto">
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
@@ -114,11 +96,10 @@
     const coverImg = document.getElementById("cover");
     const backgroundBlur = document.getElementById("background-blur");
 
-    // Control de Play/Stop
     let isPlaying = false;
+
     playButton.addEventListener("click", () => {
       if (isPlaying) {
-        // Stop = pausa + reset (no reanuda desde el mismo punto)
         audio.pause();
         audio.currentTime = 0;
         playButton.textContent = "▶";
@@ -127,22 +108,14 @@
         audio.play().then(() => {
           playButton.textContent = "■";
           isPlaying = true;
-        }).catch(err => {
-          console.log("Autoplay bloqueado:", err);
-        });
+        }).catch(err => console.log("Autoplay bloqueado:", err));
       }
     });
 
-    // Arrancar en autoplay si Android/iOS lo permite
     audio.volume = 0.8;
-    audio.play().then(() => {
-      playButton.textContent = "■";
-      isPlaying = true;
-    }).catch(() => {
-      console.log("Autoplay bloqueado por navegador");
-    });
+    audio.play().then(() => { playButton.textContent = "■"; isPlaying = true; })
+                 .catch(() => console.log("Autoplay bloqueado"));
 
-    // Función global para actualizar carátula y fondo
     function updateCover(newSrc) {
       coverImg.style.opacity = 0;
       setTimeout(() => {
@@ -152,17 +125,20 @@
       }, 500);
     }
 
-    // Iniciar LunaRadio (solo metadatos y carátula)
-    $("#player-container").lunaradio({
+    // Inicializar Lunaradio
+    const player = $("#player-container").lunaradio({
       radioname: "BELLOS RECUERDOS",
       streamurl: "https://whmsonic.playerfullhd.com:7034",
       streamtype: "shoutcast2",
       shoutcastpath: "/stream",
       shoutcastid: "1",
       itunestoken: "1000lIPN",
-      coverimage: "js/brlogo.png",
-      metadatainterval: 5000
+      coverimage: "js/brlogo.png"
     });
+
+    // Actualizar metadatos cuando detectes cambio de canción
+    // player.refresh();  <-- Llamar desde tu backend o trigger
   </script>
+
 </body>
 </html>
