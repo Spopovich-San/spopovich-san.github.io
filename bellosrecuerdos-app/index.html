@@ -4,6 +4,12 @@
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
 
+  <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
+
+  <!-- Lunaradio modificado -->
+  <script src="js/lunaradio-sincors.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -120,28 +126,17 @@
     audio.play().then(() => { playButton.textContent = "■"; isPlaying = true; })
                  .catch(() => console.log("Autoplay bloqueado"));
 
-    // ======== SSE para actualizar metadatos en tiempo real ========
-    const evtSource = new EventSource("https://tuserver.com/song-updates"); // reemplaza con tu endpoint SSE
-
-    evtSource.onmessage = function(event) {
-      try {
-        const data = JSON.parse(event.data); 
-        // data: { title: "Título", artist: "Artista", cover: "url_imagen" }
-
-        let fullTitle = data.artist ? `${data.artist} - ${data.title}` : data.title;
-        trackText.textContent = fullTitle;
-
-        if (data.cover && data.cover !== "") {
-          updateCover(data.cover);
-        }
-      } catch(e) {
-        console.error("Error parseando datos del servidor:", e);
-      }
-    };
-
-    evtSource.onerror = function(err) {
-      console.error("Error SSE:", err);
-    };
+    // ====== Inicializar Lunaradio con refresco cada 5s ======
+    const player = $("#player-container").lunaradio({
+      radioname: "BELLOS RECUERDOS",
+      streamurl: "https://whmsonic.playerfullhd.com:7034",
+      streamtype: "shoutcast2",
+      shoutcastpath: "/stream",
+      shoutcastid: "1",
+      itunestoken: "1000lIPN",
+      coverimage: "js/brlogo.png",
+      metadatainterval: 5000
+    });
   </script>
 
 </body>
