@@ -3,23 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
-  <script src="js/jquery-3.2.1.min.js"></script>
+
+  <!-- jQuery -->
+  <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
+
+  <!-- lunaradio modificado -->
   <script src="js/lunaradio-sincors.js"></script>
+
   <style>
     body {
-      margin: 0; padding: 0;
-      background: #000; color: #fff;
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
       font-family: 'Bebas Neue', sans-serif;
       text-align: center;
-      position: relative;
       overflow: hidden;
     }
 
-    /* Fondo difuminado (portada con blur) */
-    #cover-bg {
+    /* Fondo difuminado */
+    #background-blur {
       position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background-size: cover;
       background-position: center;
       filter: blur(20px) brightness(0.4);
@@ -27,148 +35,134 @@
       transition: background-image 1s ease-in-out;
     }
 
-    /* Portada principal */
-    #luna-cover {
-      width: 260px;
-      height: 260px;
-      object-fit: cover;
-      margin-top: 20px;
-      border-radius: 12px;
-      opacity: 0;
-      transform: scale(0.9);
-      transition: opacity 0.8s ease, transform 0.8s ease;
+    /* Contenedor central */
+    #player-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
-    #luna-cover.show {
-      opacity: 1;
-      transform: scale(1);
+
+    #station-title {
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+
+    #station-subtitle {
+      font-size: 18px;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
+
+    #cover {
+      width: 250px;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+      transition: opacity 0.5s ease-in-out;
     }
 
     #luna-track {
+      margin-top: 20px;
       font-size: 20px;
-      margin: 10px 0;
-    }
-    #radio-title {
-      font-size: 28px;
-      margin-top: 15px;
-      color: #FF6767;
-    }
-    #radio-sub {
-      font-size: 18px;
-      margin-bottom: 15px;
-      font-style: italic;
     }
 
-    /* Botón Play centrado */
-    #playBtn {
-      background: #FF6767;
-      border: none;
+    /* Botón Play/Stop */
+    #playButton {
+      margin-top: 25px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
-      width: 90px;
-      height: 90px;
+      background: #FF6767;
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      border: none;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 25px auto;
+      transition: background 0.3s;
     }
-    #playBtn svg {
-      fill: white;
-      width: 40px;
-      height: 40px;
+    #playButton:hover {
+      background: #ff4444;
     }
   </style>
 </head>
 <body>
 
-  <!-- Fondo difuminado -->
-  <div id="cover-bg" style="background-image: url('js/brlogo.png');"></div>
+  <div id="background-blur"></div>
 
-  <h1 id="radio-title">BELLOS RECUERDOS</h1>
-  <div id="radio-sub">"Te llevamos a tu época"</div>
+  <div id="player-container">
+    <div id="station-title">BELLOS RECUERDOS</div>
+    <div id="station-subtitle">"Te llevamos a tu época"</div>
 
-  <img id="luna-cover" src="js/brlogo.png" alt="cover" class="show">
-  <h2 id="luna-track">Cargando canción...</h2>
+    <img id="cover" src="js/brlogo.png" alt="Carátula">
+    <div id="luna-track">Cargando canción...</div>
 
-  <!-- Botón Play / Stop -->
-  <button id="playBtn">
-    <!-- Ícono Play -->
-    <svg id="iconPlay" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M8 5v14l11-7z"/>
-    </svg>
-    <!-- Ícono Pause -->
-    <svg id="iconPause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none;">
-      <path d="M6 19h4V5H6zm8-14v14h4V5h-4z"/>
-    </svg>
-  </button>
+    <!-- Botón Play/Stop -->
+    <button id="playButton">▶</button>
+  </div>
 
   <!-- Reproductor nativo oculto -->
-  <audio id="radioNative" autoplay>
+  <audio id="radioNative" preload="auto">
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
   <script>
-    // Inicializar Luna solo para metadatos
-    $("#lunaradio").lunaradio({
+    const audio = document.getElementById("radioNative");
+    const playButton = document.getElementById("playButton");
+    const coverImg = document.getElementById("cover");
+    const backgroundBlur = document.getElementById("background-blur");
+
+    // Control de Play/Stop
+    let isPlaying = false;
+    playButton.addEventListener("click", () => {
+      if (isPlaying) {
+        // Stop = pausa + reset (no reanuda desde el mismo punto)
+        audio.pause();
+        audio.currentTime = 0;
+        playButton.textContent = "▶";
+        isPlaying = false;
+      } else {
+        audio.play().then(() => {
+          playButton.textContent = "■";
+          isPlaying = true;
+        }).catch(err => {
+          console.log("Autoplay bloqueado:", err);
+        });
+      }
+    });
+
+    // Arrancar en autoplay si Android/iOS lo permite
+    audio.volume = 0.8;
+    audio.play().then(() => {
+      playButton.textContent = "■";
+      isPlaying = true;
+    }).catch(() => {
+      console.log("Autoplay bloqueado por navegador");
+    });
+
+    // Función global para actualizar carátula y fondo
+    function updateCover(newSrc) {
+      coverImg.style.opacity = 0;
+      setTimeout(() => {
+        coverImg.src = newSrc;
+        coverImg.style.opacity = 1;
+        backgroundBlur.style.backgroundImage = `url('${newSrc}')`;
+      }, 500);
+    }
+
+    // Iniciar LunaRadio (solo metadatos y carátula)
+    $("#player-container").lunaradio({
       radioname: "BELLOS RECUERDOS",
       streamurl: "https://whmsonic.playerfullhd.com:7034",
+      streamtype: "shoutcast2",
+      shoutcastpath: "/stream",
       shoutcastid: "1",
       itunestoken: "1000lIPN",
       coverimage: "js/brlogo.png",
       metadatainterval: 5000
     });
-
-    // Cambiar portada con efecto + fondo difuminado
-    function updateCover(newSrc) {
-      const cover = document.getElementById("luna-cover");
-      const bg = document.getElementById("cover-bg");
-
-      cover.classList.remove("show");
-      setTimeout(() => {
-        cover.src = newSrc;
-        cover.onload = () => {
-          cover.classList.add("show");
-          bg.style.backgroundImage = `url('${newSrc}')`;
-        };
-      }, 300);
-    }
-
-    // Control de audio nativo
-    const audio = document.getElementById("radioNative");
-    const playBtn = document.getElementById("playBtn");
-    const iconPlay = document.getElementById("iconPlay");
-    const iconPause = document.getElementById("iconPause");
-
-    function setPlayUI() {
-      iconPlay.style.display = "block";
-      iconPause.style.display = "none";
-    }
-
-    function setPauseUI() {
-      iconPlay.style.display = "none";
-      iconPause.style.display = "block";
-    }
-
-    playBtn.addEventListener("click", () => {
-      if (audio.paused) {
-        audio.load(); // asegura streaming en vivo
-        audio.play();
-        setPauseUI();
-      } else {
-        audio.pause();
-        setPlayUI();
-      }
-    });
-
-    // Intentar autoplay
-    audio.play().then(() => {
-      setPauseUI();
-    }).catch(() => {
-      console.log("El navegador bloqueó el autoplay.");
-      setPlayUI();
-    });
-
-    // Aquí sincors.js debería llamar a updateCover(url) cuando detecta nueva carátula
   </script>
-
 </body>
 </html>
