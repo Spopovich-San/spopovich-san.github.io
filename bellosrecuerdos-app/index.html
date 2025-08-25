@@ -7,7 +7,7 @@
   <!-- jQuery -->
   <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
 
-  <!-- Lunaradio modificado -->
+  <!-- lunaradio modificado -->
   <script src="js/lunaradio-sincors.js"></script>
 
   <style>
@@ -21,6 +21,7 @@
       overflow: hidden;
     }
 
+    /* Fondo difuminado */
     #background-blur {
       position: fixed;
       top: 0;
@@ -34,6 +35,7 @@
       transition: background-image 1s ease-in-out;
     }
 
+    /* Contenedor central */
     #player-container {
       display: flex;
       flex-direction: column;
@@ -42,8 +44,16 @@
       height: 100vh;
     }
 
-    #station-title { font-size: 36px; margin-bottom: 5px; }
-    #station-subtitle { font-size: 18px; font-style: italic; margin-bottom: 20px; }
+    #station-title {
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+
+    #station-subtitle {
+      font-size: 18px;
+      font-style: italic;
+      margin-bottom: 20px;
+    }
 
     #cover {
       width: 250px;
@@ -54,8 +64,12 @@
       transition: opacity 0.5s ease-in-out;
     }
 
-    #luna-track { margin-top: 20px; font-size: 20px; }
+    #luna-track {
+      margin-top: 20px;
+      font-size: 20px;
+    }
 
+    /* Botón Play/Stop */
     #playButton {
       margin-top: 25px;
       width: 80px;
@@ -69,7 +83,9 @@
       cursor: pointer;
       transition: background 0.3s;
     }
-    #playButton:hover { background: #ff4444; }
+    #playButton:hover {
+      background: #ff4444;
+    }
   </style>
 </head>
 <body>
@@ -81,12 +97,14 @@
     <div id="station-subtitle">"Te llevamos a tu época"</div>
 
     <img id="cover" src="js/brlogo.png" alt="Carátula">
-    <div id="luna-track">Cargando canción...</div>
+    <div id="luna-track"></div>
 
+    <!-- Botón Play/Stop -->
     <button id="playButton">▶</button>
   </div>
 
-  <audio id="radioNative" preload="auto">
+  <!-- Reproductor nativo oculto -->
+  <audio id="radioNative" preload="auto" controls style="display:none;">
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
@@ -95,19 +113,9 @@
     const playButton = document.getElementById("playButton");
     const coverImg = document.getElementById("cover");
     const backgroundBlur = document.getElementById("background-blur");
-    const trackText = document.getElementById("luna-track");
 
+    // Control de Play/Stop
     let isPlaying = false;
-
-    function updateCover(newSrc) {
-      coverImg.style.opacity = 0;
-      setTimeout(() => {
-        coverImg.src = newSrc;
-        coverImg.style.opacity = 1;
-        backgroundBlur.style.backgroundImage = `url('${newSrc}')`;
-      }, 500);
-    }
-
     playButton.addEventListener("click", () => {
       if (isPlaying) {
         audio.pause();
@@ -118,16 +126,33 @@
         audio.play().then(() => {
           playButton.textContent = "■";
           isPlaying = true;
-        }).catch(err => console.log("Autoplay bloqueado:", err));
+        }).catch(err => {
+          console.log("Autoplay bloqueado:", err);
+        });
       }
     });
 
+    // Intentar autoplay si el navegador lo permite
     audio.volume = 0.8;
-    audio.play().then(() => { playButton.textContent = "■"; isPlaying = true; })
-                 .catch(() => console.log("Autoplay bloqueado"));
+    audio.play().then(() => {
+      playButton.textContent = "■";
+      isPlaying = true;
+    }).catch(() => {
+      console.log("Autoplay bloqueado por navegador");
+    });
 
-    // ====== Inicializar Lunaradio con refresco cada 5s ======
-    const player = $("#player-container").lunaradio({
+    // Función global para actualizar carátula y fondo
+    function updateCover(newSrc) {
+      coverImg.style.opacity = 0;
+      setTimeout(() => {
+        coverImg.src = newSrc;
+        coverImg.style.opacity = 1;
+        backgroundBlur.style.backgroundImage = `url('${newSrc}')`;
+      }, 500);
+    }
+
+    // Iniciar LunaRadio (solo metadatos y carátula)
+    $("#player-container").lunaradio({
       radioname: "BELLOS RECUERDOS",
       streamurl: "https://whmsonic.playerfullhd.com:7034",
       streamtype: "shoutcast2",
@@ -138,6 +163,5 @@
       metadatainterval: 5000
     });
   </script>
-
 </body>
 </html>
