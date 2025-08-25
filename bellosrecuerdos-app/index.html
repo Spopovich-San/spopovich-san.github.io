@@ -13,31 +13,23 @@
       text-align: center;
     }
     #luna-cover {
-      width: 260px;
-      height: 260px;
+      width: 250px;
+      height: 250px;
       object-fit: cover;
-      margin-top: 10px;
-      border-radius: 10px;
-      opacity: 0;
-      transform: scale(0.9);
-      transition: opacity 0.8s ease, transform 0.8s ease;
-    }
-    #luna-cover.show {
-      opacity: 1;
-      transform: scale(1);
+      margin-top: 20px;
     }
     #luna-track {
       font-size: 20px;
       margin: 10px 0;
     }
     #radio-title {
-      font-size: 28px;
+      font-size: 32px;
       margin-top: 15px;
       color: #FF6767;
     }
     #radio-sub {
       font-size: 18px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       font-style: italic;
     }
     #playBtn {
@@ -64,7 +56,7 @@
   <h1 id="radio-title">BELLOS RECUERDOS</h1>
   <div id="radio-sub">"Te llevamos a tu época"</div>
 
-  <img id="luna-cover" src="js/brlogo.png" alt="cover" class="show">
+  <img id="luna-cover" src="js/brlogo.png" alt="cover">
   <h2 id="luna-track">Cargando canción...</h2>
 
   <!-- Botón Play / Stop -->
@@ -94,16 +86,6 @@
       coverimage: "js/brlogo.png",
       metadatainterval: 5000
     });
-
-    // Animación al cambiar portada
-    function updateCover(newSrc) {
-      const cover = document.getElementById("luna-cover");
-      cover.classList.remove("show");
-      setTimeout(() => {
-        cover.src = newSrc;
-        cover.onload = () => cover.classList.add("show");
-      }, 300);
-    }
 
     // Control del audio nativo
     const audio = document.getElementById("radioNative");
@@ -139,10 +121,6 @@
       console.log("El navegador bloqueó el autoplay.");
       setPlayUI();
     });
-
-    // Ejemplo: simular actualización de portada desde Luna
-    // (En sincors.js deberás llamar updateCover(url) cuando cambie la carátula)
-    // updateCover("https://link-a-una-nueva-portada.jpg");
   </script>
 
 </body>
