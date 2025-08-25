@@ -4,12 +4,6 @@
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
 
-  <!-- jQuery -->
-  <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
-
-  <!-- Lunaradio modificado -->
-  <script src="js/lunaradio-sincors.js"></script>
-
   <style>
     body {
       margin: 0;
@@ -81,7 +75,7 @@
     <div id="station-subtitle">"Te llevamos a tu época"</div>
 
     <img id="cover" src="js/brlogo.png" alt="Carátula">
-    <div id="luna-track"></div>
+    <div id="luna-track">Cargando canción...</div>
 
     <button id="playButton">▶</button>
   </div>
@@ -95,8 +89,18 @@
     const playButton = document.getElementById("playButton");
     const coverImg = document.getElementById("cover");
     const backgroundBlur = document.getElementById("background-blur");
+    const trackText = document.getElementById("luna-track");
 
     let isPlaying = false;
+
+    function updateCover(newSrc) {
+      coverImg.style.opacity = 0;
+      setTimeout(() => {
+        coverImg.src = newSrc;
+        coverImg.style.opacity = 1;
+        backgroundBlur.style.backgroundImage = `url('${newSrc}')`;
+      }, 500);
+    }
 
     playButton.addEventListener("click", () => {
       if (isPlaying) {
@@ -116,28 +120,28 @@
     audio.play().then(() => { playButton.textContent = "■"; isPlaying = true; })
                  .catch(() => console.log("Autoplay bloqueado"));
 
-    function updateCover(newSrc) {
-      coverImg.style.opacity = 0;
-      setTimeout(() => {
-        coverImg.src = newSrc;
-        coverImg.style.opacity = 1;
-        backgroundBlur.style.backgroundImage = `url('${newSrc}')`;
-      }, 500);
-    }
+    // ======== SSE para actualizar metadatos en tiempo real ========
+    const evtSource = new EventSource("https://tuserver.com/song-updates"); // reemplaza con tu endpoint SSE
 
-    // Inicializar Lunaradio
-    const player = $("#player-container").lunaradio({
-      radioname: "BELLOS RECUERDOS",
-      streamurl: "https://whmsonic.playerfullhd.com:7034",
-      streamtype: "shoutcast2",
-      shoutcastpath: "/stream",
-      shoutcastid: "1",
-      itunestoken: "1000lIPN",
-      coverimage: "js/brlogo.png"
-    });
+    evtSource.onmessage = function(event) {
+      try {
+        const data = JSON.parse(event.data); 
+        // data: { title: "Título", artist: "Artista", cover: "url_imagen" }
 
-    // Actualizar metadatos cuando detectes cambio de canción
-    // player.refresh();  <-- Llamar desde tu backend o trigger
+        let fullTitle = data.artist ? `${data.artist} - ${data.title}` : data.title;
+        trackText.textContent = fullTitle;
+
+        if (data.cover && data.cover !== "") {
+          updateCover(data.cover);
+        }
+      } catch(e) {
+        console.error("Error parseando datos del servidor:", e);
+      }
+    };
+
+    evtSource.onerror = function(err) {
+      console.error("Error SSE:", err);
+    };
   </script>
 
 </body>
