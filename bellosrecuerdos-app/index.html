@@ -7,58 +7,33 @@
   <script src="js/lunaradio-sincors.js"></script>
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      color: #fff;
       margin: 0; padding: 0;
       background: #000; color: #fff;
       font-family: 'Bebas Neue', sans-serif;
+      text-align: center;
+      position: relative;
       overflow: hidden;
     }
-    #lunaradio {
-      width: 100%;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      position: relative;
-      text-align: center;
-      padding-top: 40px;
-      box-sizing: border-box;
-    }
-    /* Fondo difuminado */
-    #luna-bg {
-      position: absolute;
+
+    /* Fondo difuminado (portada con blur) */
+    #cover-bg {
+      position: fixed;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       background-size: cover;
       background-position: center;
-      filter: blur(12px) brightness(0.6);
-      z-index: 1;
+      filter: blur(20px) brightness(0.4);
+      z-index: -1;
+      transition: background-image 1s ease-in-out;
     }
-    /* Contenido principal */
-    #luna-content {
-      position: relative;
-      z-index: 2;
-    }
-    #luna-title {
-      color: #FF6767;
-      font-size: 28px;
-      margin: 0 0 25px 0;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.8); /* sombreado */
-    }
+
+    /* Portada principal */
     #luna-cover {
-      width: 300px;
-      height: 300px;
       width: 260px;
       height: 260px;
       object-fit: cover;
+      margin-top: 20px;
       border-radius: 12px;
-      box-shadow: 0px 4px 15px rgba(0,0,0,0.6);
-      margin-top: 10px;
-      border-radius: 10px;
       opacity: 0;
       transform: scale(0.9);
       transition: opacity 0.8s ease, transform 0.8s ease;
@@ -67,11 +42,9 @@
       opacity: 1;
       transform: scale(1);
     }
+
     #luna-track {
-      color: #fff;
       font-size: 20px;
-      margin-top: 25px;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.8); /* sombreado */
       margin: 10px 0;
     }
     #radio-title {
@@ -84,6 +57,8 @@
       margin-bottom: 15px;
       font-style: italic;
     }
+
+    /* Botón Play centrado */
     #playBtn {
       background: #FF6767;
       border: none;
@@ -94,7 +69,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 20px;
+      margin: 25px auto;
     }
     #playBtn svg {
       fill: white;
@@ -104,14 +79,9 @@
   </style>
 </head>
 <body>
-  <div id="lunaradio">
-    <div id="luna-bg"></div>
-    <div id="luna-content">
-      <h1 id="luna-title">BELLOS RECUERDOS</h1>
-      <img id="luna-cover" src="js/brlogo.png" alt="cover">
-      <h2 id="luna-track">Cargando canción...</h2>
-    </div>
-  </div>
+
+  <!-- Fondo difuminado -->
+  <div id="cover-bg" style="background-image: url('js/brlogo.png');"></div>
 
   <h1 id="radio-title">BELLOS RECUERDOS</h1>
   <div id="radio-sub">"Te llevamos a tu época"</div>
@@ -125,7 +95,7 @@
     <svg id="iconPlay" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       <path d="M8 5v14l11-7z"/>
     </svg>
-    <!-- Ícono Pause (oculto al inicio) -->
+    <!-- Ícono Pause -->
     <svg id="iconPause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none;">
       <path d="M6 19h4V5H6zm8-14v14h4V5h-4z"/>
     </svg>
@@ -137,33 +107,32 @@
   </audio>
 
   <script>
-    // Inicializar Luna solo para carátula y metadatos
+    // Inicializar Luna solo para metadatos
     $("#lunaradio").lunaradio({
       radioname: "BELLOS RECUERDOS",
-      coverimage: "js/brlogo.png",
-      coverstyle: "square",
       streamurl: "https://whmsonic.playerfullhd.com:7034",
-      streamtype: "shoutcast2",
-      shoutcastpath: "/stream",
       shoutcastid: "1",
       itunestoken: "1000lIPN",
-      metadatainterval: "5000",
-      autoplay: "true"
       coverimage: "js/brlogo.png",
       metadatainterval: 5000
     });
 
-    // Animación al cambiar portada
+    // Cambiar portada con efecto + fondo difuminado
     function updateCover(newSrc) {
       const cover = document.getElementById("luna-cover");
+      const bg = document.getElementById("cover-bg");
+
       cover.classList.remove("show");
       setTimeout(() => {
         cover.src = newSrc;
-        cover.onload = () => cover.classList.add("show");
+        cover.onload = () => {
+          cover.classList.add("show");
+          bg.style.backgroundImage = `url('${newSrc}')`;
+        };
       }, 300);
     }
 
-    // Control del audio nativo
+    // Control de audio nativo
     const audio = document.getElementById("radioNative");
     const playBtn = document.getElementById("playBtn");
     const iconPlay = document.getElementById("iconPlay");
@@ -198,9 +167,7 @@
       setPlayUI();
     });
 
-    // Ejemplo: simular actualización de portada desde Luna
-    // (En sincors.js deberás llamar updateCover(url) cuando cambie la carátula)
-    // updateCover("https://link-a-una-nueva-portada.jpg");
+    // Aquí sincors.js debería llamar a updateCover(url) cuando detecta nueva carátula
   </script>
 
 </body>
