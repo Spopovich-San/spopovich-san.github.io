@@ -7,28 +7,29 @@
             shoutcastpath: "/stream",
             shoutcastid: "1",
             itunestoken: "1000lIPN",
-            coverimage: "js/brlogo.png"
+            coverimage: "js/brlogo.png",
+            metadatainterval: 5000
         }, options);
 
         var $container = $(this);
-        var lastSong = ""; // guarda la última canción mostrada
+        var lastSong = "";
+        var lastCover = "";
 
         $("#luna-track").text("Cargando canción...");
 
         function updateMetadata(title, artist, coverUrl) {
-            var fullTitle = title;
-            if (artist) fullTitle = artist + " - " + title;
+            var fullTitle = artist ? artist + " - " + title : title;
 
-            // Solo actualizar si la canción cambió
-            if (fullTitle === lastSong) return;
+            // Solo actualizar si cambió la canción o portada
+            if (fullTitle === lastSong && coverUrl === lastCover) return;
+
             lastSong = fullTitle;
-
-            $("#luna-track").text(fullTitle);
+            trackText.textContent = fullTitle;
 
             if (!coverUrl || coverUrl === "") coverUrl = settings.coverimage;
-
-            if (typeof updateCover === "function") {
-                updateCover(coverUrl);
+            if (coverUrl !== lastCover) {
+                lastCover = coverUrl;
+                if (typeof updateCover === "function") updateCover(coverUrl);
             }
         }
 
@@ -74,12 +75,8 @@
             });
         }
 
-        // Ejecutar la primera vez
+        // Ejecutar al inicio
         fetchMetadata();
-
-        // Retornar función para actualizar cuando tu stream detecte cambio
-        return {
-            refresh: fetchMetadata
-        };
+        setInterval(fetchMetadata, settings.metadatainterval);
     };
 })(jQuery);
