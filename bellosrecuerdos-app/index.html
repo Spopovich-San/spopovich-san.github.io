@@ -36,18 +36,11 @@
       background: #FF6767;
       border: none;
       border-radius: 50%;
-      width: 90px;
-      height: 90px;
+      width: 80px;
+      height: 80px;
+      color: white;
+      font-size: 20px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    #playBtn svg {
-      fill: white;
-      width: 40px;
-      height: 40px;
     }
   </style>
 </head>
@@ -60,16 +53,7 @@
   <h2 id="luna-track">Cargando canción...</h2>
 
   <!-- Botón Play / Stop -->
-  <button id="playBtn">
-    <!-- Ícono Play -->
-    <svg id="iconPlay" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M8 5v14l11-7z"/>
-    </svg>
-    <!-- Ícono Pause (oculto al inicio) -->
-    <svg id="iconPause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none;">
-      <path d="M6 19h4V5H6zm8-14v14h4V5h-4z"/>
-    </svg>
-  </button>
+  <button id="playBtn">⏸</button>
 
   <!-- Reproductor nativo oculto -->
   <audio id="radioNative" autoplay>
@@ -90,36 +74,22 @@
     // Control del audio nativo
     const audio = document.getElementById("radioNative");
     const playBtn = document.getElementById("playBtn");
-    const iconPlay = document.getElementById("iconPlay");
-    const iconPause = document.getElementById("iconPause");
-
-    function setPlayUI() {
-      iconPlay.style.display = "block";
-      iconPause.style.display = "none";
-    }
-
-    function setPauseUI() {
-      iconPlay.style.display = "none";
-      iconPause.style.display = "block";
-    }
 
     playBtn.addEventListener("click", () => {
       if (audio.paused) {
-        audio.load(); // asegura streaming en vivo
+        audio.load(); // asegura sincronía (no reanuda desde pausa, vuelve al vivo)
         audio.play();
-        setPauseUI();
+        playBtn.textContent = "⏸";
       } else {
         audio.pause();
-        setPlayUI();
+        playBtn.textContent = "▶️";
       }
     });
 
     // Intentar autoplay
-    audio.play().then(() => {
-      setPauseUI();
-    }).catch(() => {
-      console.log("El navegador bloqueó el autoplay.");
-      setPlayUI();
+    audio.play().catch(() => {
+      console.log("El navegador bloqueó el autoplay, el usuario debe presionar Play.");
+      playBtn.textContent = "▶️";
     });
   </script>
 
