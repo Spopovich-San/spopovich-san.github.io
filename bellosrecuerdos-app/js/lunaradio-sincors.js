@@ -1,65 +1,94 @@
+/*
+ * Lunaradio modificado - solo metadatos y carátula
+ * Reproduce el streaming con el audio nativo de Android/iOS
+ * y usa Luna únicamente para mostrar info visual.
+ */
+
 (function ($) {
     $.fn.lunaradio = function (options) {
         var settings = $.extend({
-            radioname: "Radio",
+            radioname: "Mi Radio",
             streamurl: "",
             streamtype: "shoutcast2",
             shoutcastpath: "/stream",
             shoutcastid: "1",
             itunestoken: "1000lIPN",
-            metadatainterval: 5000,
-            coverimage: "js/brlogo.png", // fallback
+            coverimage: "js/brlogo.png",
+            metadatainterval: 5000
         }, options);
 
-        var $cover = $("#luna-cover");
-        var $track = $("#luna-track");
+        var $container = $(this);
 
-        function sanitizeTitle(title) {
-            return title
-                .replace(/\[.*?\]/g, "")  // quita [En Vivo]
-                .replace(/\(.*?\)/g, "")  // quita (Live)
-                .replace(/feat\..*/gi, "") // quita "feat."
-                .trim();
+        // Texto inicial
+        $("#luna-track").text("Cargando canción...");
+
+        // Función para actualizar portada y título
+        function updateMetadata(title, artist, coverUrl) {
+            var fullTitle = title;
+            if (artist) {
+                fullTitle = artist + " - " + title;
+            }
+
+            $("#luna-track").text(fullTitle);
+
+            if (!coverUrl || coverUrl === "") {
+                coverUrl = settings.coverimage;
+            }
+
+            // Llama a la función en index.html para animar el cambio
+            if (typeof updateCover === "function") {
+                updateCover(coverUrl);
+            }
         }
 
-        function updateMetadata() {
-            $.getJSON(settings.streamurl + "/stats?sid=" + settings.shoutcastid + "&json=1", function (data) {
-                if (data && data.songtitle) {
-                    var rawTitle = data.songtitle;
-                    var cleanTitle = sanitizeTitle(rawTitle);
+        // Obtener metadatos desde Shoutcast
+        function fetchMetadata() {
+            if (!settings.streamurl) return;
 
-                    $track.text(rawTitle);
+            var url = settings.streamurl + "/stats?sid=" + settings.shoutcastid + "&json=1";
 
-                    // Buscar en iTunes
-                    $.ajax({
-                        url: "https://itunes.apple.com/search",
-                        data: {
-                            term: cleanTitle,
-                            entity: "song",
-                            limit: 1
-                        },
-                        dataType: "jsonp",
-                        success: function (res) {
-                            if (res.results && res.results.length > 0) {
-                                $cover.attr("src", res.results[0].artworkUrl100.replace("100x100", "300x300"));
-                                $("#luna-bg").css("background-image", "url('" + res.results[0].artworkUrl100.replace("100x100", "600x600") + "')");
-                            } else {
-                                // fallback
-                                $cover.attr("src", settings.coverimage);
-                                $("#luna-bg").css("background-image", "url('" + settings.coverimage + "')");
+            $.ajax({
+                url: url,
+                dataType: "json",
+                success: function (data) {
+                    if (data && data.songtitle) {
+                        var parts = data.songtitle.split(" - ");
+                        var artist = parts.length > 1 ? parts[0] : "";
+                        var title = parts.length > 1 ? parts[1] : data.songtitle;
+
+                        // Buscar portada en iTunes
+                        $.ajax({
+                            url: "https://itunes.apple.com/search",
+                            dataType: "jsonp",
+                            data: {
+                                term: artist + " " + title,
+                                media: "music",
+                                entity: "song",
+                                limit: 1
+                            },
+                            success: function (res) {
+                                var cover = "";
+                                if (res.results && res.results.length > 0) {
+                                    cover = res.results[0].artworkUrl100.replace("100x100", "600x600");
+                                }
+                                updateMetadata(title, artist, cover);
+                            },
+                            error: function () {
+                                updateMetadata(title, artist, "");
                             }
-                        },
-                        error: function () {
-                            $cover.attr("src", settings.coverimage);
-                            $("#luna-bg").css("background-image", "url('" + settings.coverimage + "')");
-                        }
-                    });
+                        });
+                    }
+                },
+                error: function () {
+                    console.log("No se pudieron obtener metadatos.");
                 }
             });
         }
 
-        // Actualizar cada intervalo
-        setInterval(updateMetadata, settings.metadatainterval);
-        updateMetadata();
+        // Ejecutar al inicio
+        fetchMetadata();
+
+        // Repetir cada X segundos
+        setInterval(fetchMetadata, settings.metadatainterval);
     };
 })(jQuery);
