@@ -1,9 +1,3 @@
-/*
- * Lunaradio modificado - solo metadatos y carátula
- * Reproduce el streaming con el audio nativo de Android/iOS
- * y usa Luna únicamente para mostrar info visual.
- */
-
 (function ($) {
     $.fn.lunaradio = function (options) {
         var settings = $.extend({
@@ -13,35 +7,31 @@
             shoutcastpath: "/stream",
             shoutcastid: "1",
             itunestoken: "1000lIPN",
-            coverimage: "js/brlogo.png",
-            metadatainterval: 5000
+            coverimage: "js/brlogo.png"
         }, options);
 
         var $container = $(this);
+        var lastSong = ""; // guarda la última canción mostrada
 
-        // Texto inicial
         $("#luna-track").text("Cargando canción...");
 
-        // Función para actualizar portada y título
         function updateMetadata(title, artist, coverUrl) {
             var fullTitle = title;
-            if (artist) {
-                fullTitle = artist + " - " + title;
-            }
+            if (artist) fullTitle = artist + " - " + title;
+
+            // Solo actualizar si la canción cambió
+            if (fullTitle === lastSong) return;
+            lastSong = fullTitle;
 
             $("#luna-track").text(fullTitle);
 
-            if (!coverUrl || coverUrl === "") {
-                coverUrl = settings.coverimage;
-            }
+            if (!coverUrl || coverUrl === "") coverUrl = settings.coverimage;
 
-            // Llama a la función en index.html para animar el cambio
             if (typeof updateCover === "function") {
                 updateCover(coverUrl);
             }
         }
 
-        // Obtener metadatos desde Shoutcast
         function fetchMetadata() {
             if (!settings.streamurl) return;
 
@@ -56,7 +46,6 @@
                         var artist = parts.length > 1 ? parts[0] : "";
                         var title = parts.length > 1 ? parts[1] : data.songtitle;
 
-                        // Buscar portada en iTunes
                         $.ajax({
                             url: "https://itunes.apple.com/search",
                             dataType: "jsonp",
@@ -85,10 +74,12 @@
             });
         }
 
-        // Ejecutar al inicio
+        // Ejecutar la primera vez
         fetchMetadata();
 
-        // Repetir cada X segundos
-        setInterval(fetchMetadata, settings.metadatainterval);
+        // Retornar función para actualizar cuando tu stream detecte cambio
+        return {
+            refresh: fetchMetadata
+        };
     };
 })(jQuery);
