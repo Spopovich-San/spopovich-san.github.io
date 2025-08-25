@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Bellos Recuerdos Radio</title>
 
   <!-- jQuery -->
@@ -20,72 +20,28 @@
       text-align: center;
       overflow: hidden;
     }
-
-    /* Fondo difuminado */
     #background-blur {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
+      position: fixed; inset: 0;
+      background-size: cover; background-position: center;
       filter: blur(20px) brightness(0.4);
-      z-index: -1;
-      transition: background-image 1s ease-in-out;
+      z-index: -1; transition: background-image 1s ease-in-out;
     }
-
-    /* Contenedor central */
     #player-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;
     }
-
-    #station-title {
-      font-size: 36px;
-      margin-bottom: 5px;
-    }
-
-    #station-subtitle {
-      font-size: 18px;
-      font-style: italic;
-      margin-bottom: 20px;
-    }
-
+    #station-title { font-size: 36px; margin-bottom: 5px; }
+    #station-subtitle { font-size: 18px; font-style: italic; margin-bottom: 20px; }
     #cover {
-      width: 250px;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.7);
-      transition: opacity 0.5s ease-in-out;
+      width: 250px; height: 250px; object-fit: cover; border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7); transition: opacity 0.5s ease-in-out;
     }
-
-    #luna-track {
-      margin-top: 20px;
-      font-size: 20px;
-    }
-
-    /* Botón Play/Stop */
+    #luna-track { margin-top: 20px; font-size: 20px; }
     #playButton {
-      margin-top: 25px;
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: #FF6767;
-      color: white;
-      font-size: 28px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
+      margin-top: 25px; width: 80px; height: 80px; border-radius: 50%;
+      background: #FF6767; color: #fff; font-size: 28px; font-weight: bold;
+      border: none; cursor: pointer; transition: background 0.3s;
     }
-    #playButton:hover {
-      background: #ff4444;
-    }
+    #playButton:hover { background: #ff4444; }
   </style>
 </head>
 <body>
@@ -96,62 +52,109 @@
     <div id="station-title">BELLOS RECUERDOS</div>
     <div id="station-subtitle">"Te llevamos a tu época"</div>
 
-    <img id="cover" src="js/brlogo.png" alt="Carátula">
-    <div id="luna-track"></div>
+    <img id="cover" src="js/brlogo.png" alt="Carátula" />
+    <div id="luna-track">Cargando canción...</div>
 
-    <!-- Botón Play/Stop -->
     <button id="playButton">▶</button>
   </div>
 
-  <!-- Reproductor nativo oculto -->
-  <audio id="radioNative" preload="auto" controls style="display:none;">
-    <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
+  <!-- Reproductor nativo oculto con controles para background -->
+  <audio id="radioNative" preload="auto" controls playsinline style="display:none;">
+    <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg" />
   </audio>
 
   <script>
+    const STREAM_URL = "https://whmsonic.playerfullhd.com:7034/stream";
     const audio = document.getElementById("radioNative");
     const playButton = document.getElementById("playButton");
     const coverImg = document.getElementById("cover");
     const backgroundBlur = document.getElementById("background-blur");
+    const trackText = document.getElementById("luna-track");
 
-    // Control de Play/Stop
     let isPlaying = false;
-    playButton.addEventListener("click", () => {
-      if (isPlaying) {
-        audio.pause();
-        audio.currentTime = 0;
-        playButton.textContent = "▶";
-        isPlaying = false;
-      } else {
-        audio.play().then(() => {
-          playButton.textContent = "■";
-          isPlaying = true;
-        }).catch(err => {
-          console.log("Autoplay bloqueado:", err);
-        });
-      }
-    });
 
-    // Intentar autoplay si el navegador lo permite
-    audio.volume = 0.8;
-    audio.play().then(() => {
-      playButton.textContent = "■";
-      isPlaying = true;
-    }).catch(() => {
-      console.log("Autoplay bloqueado por navegador");
-    });
-
-    // Función global para actualizar carátula y fondo
     function updateCover(newSrc) {
+      // evita parpadeo si la imagen es la misma
+      if (coverImg.getAttribute("src") === newSrc) return;
       coverImg.style.opacity = 0;
       setTimeout(() => {
         coverImg.src = newSrc;
         coverImg.style.opacity = 1;
         backgroundBlur.style.backgroundImage = `url('${newSrc}')`;
-      }, 500);
+      }, 250);
     }
 
-    // Iniciar LunaRadio (solo metadatos y carátula)
+    // ---- Media Session: metadatos y controles del SO ----
+    function updateMediaSession({ title, artist, cover }) {
+      if (!('mediaSession' in navigator)) return;
+      const artwork = (cover && cover !== "") ? cover : "js/brlogo.png";
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: title || "Bellos Recuerdos",
+        artist: artist || "",
+        album: "Bellos Recuerdos",
+        artwork: [
+          { src: artwork, sizes: "192x192", type: "image/png" },
+          { src: artwork, sizes: "512x512", type: "image/png" }
+        ]
+      });
+      navigator.mediaSession.setActionHandler("play", () => startPlayback());
+      navigator.mediaSession.setActionHandler("pause", () => stopPlayback());
+      navigator.mediaSession.playbackState = isPlaying ? "playing" : "paused";
+    }
+
+    function startPlayback() {
+      // asegura la URL “viva” por si el SO cortó el socket
+      if (!audio.src || audio.src.indexOf(STREAM_URL) !== 0) {
+        audio.src = STREAM_URL + "?r=" + Date.now();
+      }
+      audio.play().then(() => {
+        isPlaying = true;
+        playButton.textContent = "■";
+        if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+      }).catch(err => console.log("Play bloqueado:", err));
+    }
+
+    function stopPlayback() {
+      audio.pause();
+      audio.currentTime = 0;
+      isPlaying = false;
+      playButton.textContent = "▶";
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "paused";
+    }
+
+    playButton.addEventListener("click", () => {
+      isPlaying ? stopPlayback() : startPlayback();
+    });
+
+    // Intento de autoplay (no todos los navegadores lo permiten)
+    audio.volume = 0.9;
+    audio.play().then(() => {
+      isPlaying = true; playButton.textContent = "■";
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = "playing";
+    }).catch(()=>{ /* ok */ });
+
+    // ---- Autorreconexión cuando el SO suspende la red en background ----
+    function reconnect() {
+      if (!isPlaying) return;
+      const t = Date.now();
+      audio.src = STREAM_URL + "?r=" + t; // bust cache / reconectar
+      audio.load();
+      audio.play().catch(()=>{});
+    }
+
+    audio.addEventListener("stalled", reconnect);
+    audio.addEventListener("suspend", reconnect);
+    audio.addEventListener("error", reconnect);
+    audio.addEventListener("ended", reconnect);
+
+    document.addEventListener("visibilitychange", () => {
+      // Si se va a background y estamos “en reproducción”, insiste en mantener la sesión viva
+      if (document.hidden && isPlaying) {
+        audio.play().catch(()=>{});
+      }
+    });
+
+    // Inicializa lunaradio (metadatos cada 5s, sin parpadeos)
     $("#player-container").lunaradio({
       radioname: "BELLOS RECUERDOS",
       streamurl: "https://whmsonic.playerfullhd.com:7034",
@@ -162,6 +165,11 @@
       coverimage: "js/brlogo.png",
       metadatainterval: 5000
     });
+
+    // expone funciones para que las use lunaradio-sincors.js
+    window._brUpdateCover = updateCover;
+    window._brUpdateMediaSession = updateMediaSession;
+    window._brTrackText = trackText;
   </script>
 </body>
 </html>
