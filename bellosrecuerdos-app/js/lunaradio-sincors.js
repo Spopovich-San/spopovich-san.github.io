@@ -1,87 +1,72 @@
-/*
- * Lunaradio modificado - solo metadatos y carátula, con Media Session
- */
-(function ($) {
-  $.fn.lunaradio = function (options) {
-    var settings = $.extend({
-      radioname: "Mi Radio",
+(function($){
+  $.fn.lunaradio = function(options) {
+
+    let settings = $.extend({
       streamurl: "",
       streamtype: "shoutcast2",
       shoutcastpath: "/stream",
       shoutcastid: "1",
       itunestoken: "1000lIPN",
-      coverimage: "js/brlogo.png",
-      metadatainterval: 5000
+      metadatainterval: 5000,
     }, options);
 
-    var lastSong = "";
-    var lastCover = "";
+    let lastTrack = "";
 
-    if (window._brTrackText) window._brTrackText.textContent = "Cargando canción...";
+    function updateMetadata(title, artist, coverUrl) {
+      const newTrack = title + " - " + artist;
 
-    function applyUI(title, artist, coverUrl) {
-      var fullTitle = artist ? (artist + " - " + title) : title;
+      if (newTrack !== lastTrack) {
+        lastTrack = newTrack;
 
-      // no cambió nada -> no toques UI (evita parpadeos)
-      if (fullTitle === lastSong && coverUrl === lastCover) return;
+        // Texto
+        $("#luna-track").text(newTrack);
 
-      // título
-      lastSong = fullTitle;
-      if (window._brTrackText) window._brTrackText.textContent = fullTitle;
-
-      // portada + blur
-      var finalCover = coverUrl && coverUrl !== "" ? coverUrl : settings.coverimage;
-      if (finalCover !== lastCover) {
-        lastCover = finalCover;
-        if (typeof window._brUpdateCover === "function") {
-          window._brUpdateCover(finalCover);
+        // Imagen
+        if (!coverUrl || coverUrl === "") {
+          coverUrl = "js/brlogo.png"; // logo por defecto
         }
-      }
-
-      // Media Session (lockscreen / notificaciones)
-      if (typeof window._brUpdateMediaSession === "function") {
-        window._brUpdateMediaSession({ title: title, artist: artist, cover: finalCover });
+        if (typeof updateCover === "function") {
+          updateCover(coverUrl);
+        }
       }
     }
 
     function fetchMetadata() {
-      if (!settings.streamurl) return;
-      var url = settings.streamurl + "/stats?sid=" + settings.shoutcastid + "&json=1";
+      let url = settings.streamurl + "/stats?sid=" + settings.shoutcastid + "&json=1";
 
-      $.ajax({
-        url: url, dataType: "json",
-        success: function (data) {
-          if (data && data.songtitle) {
-            var parts = data.songtitle.split(" - ");
-            var artist = parts.length > 1 ? parts[0] : "";
-            var title  = parts.length > 1 ? parts[1] : data.songtitle;
-
-            // Buscar portada en iTunes
-            $.ajax({
-              url: "https://itunes.apple.com/search",
-              dataType: "jsonp",
-              data: { term: artist + " " + title, media: "music", entity: "song", limit: 1 },
-              success: function (res) {
-                var cover = "";
-                if (res.results && res.results.length > 0) {
-                  cover = res.results[0].artworkUrl100.replace("100x100", "600x600");
-                }
-                applyUI(title, artist, cover);
-              },
-              error: function () {
-                applyUI(title, artist, "");
-              }
-            });
+      fetch(url)
+        .then(r => r.json())
+        .then(data => {
+          let title = "Desconocido";
+          let artist = "";
+          if (data.songtitle) {
+            let parts = data.songtitle.split(" - ");
+            artist = parts[0] || "";
+            title  = parts[1] || parts[0] || "Desconocido";
           }
-        },
-        error: function () {
-          console.log("No se pudieron obtener metadatos.");
-        }
-      });
+
+          // Buscar carátula en iTunes
+          let cover = "";
+          if (artist && title) {
+            fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist + " " + title)}&entity=musicTrack&limit=1&token=${settings.itunestoken}`)
+              .then(r => r.json())
+              .then(itunes => {
+                if (itunes.results && itunes.results.length > 0) {
+                  cover = itunes.results[0].artworkUrl100.replace("100x100", "300x300");
+                }
+                updateMetadata(title, artist, cover);
+              });
+          } else {
+            updateMetadata(title, artist, "");
+          }
+        })
+        .catch(err => console.error("Error metadata:", err));
     }
 
-    // primera carga y luego cada X segundos
-    fetchMetadata();
+    // Inicia interval
     setInterval(fetchMetadata, settings.metadatainterval);
+    fetchMetadata();
+
+    return this;
   };
 })(jQuery);
