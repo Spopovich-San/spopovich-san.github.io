@@ -3,63 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <title>Bellos Recuerdos Radio</title>
-  <script src="js/jquery-3.2.1.min.js"></script>
+
+  <!-- jQuery desde CDN -->
+  <script src="https://cdn.jsdelivr.net/gh/jquery/jquery@3.2.1/dist/jquery.min.js"></script>
+  <!-- lunaradio-sincors editado -->
   <script src="js/lunaradio-sincors.js"></script>
+
   <style>
-    /* Ocultamos controles de Luna que no usaremos */
-    .lunaradio-playbutton,
-    .lunaradio-volume,
-    .lunaradio-fav,
-    .lunaradio-share,
-    .lunaradio-social,
-    .lunaradio-download {
-      display: none !important;
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: 'Bebas Neue', sans-serif;
+      text-align: center;
+    }
+    #lunaradio {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .station-name {
+      font-size: 2em;
+      margin-bottom: 5px;
+    }
+    .station-slogan {
+      font-size: 1em;
+      margin-bottom: 15px;
+      color: #FF6767;
+    }
+    .cover {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.3);
+    }
+    .metadata {
+      font-size: 1.2em;
+      margin-top: 10px;
     }
   </style>
 </head>
-<body style="margin:0; padding:0; background:#000; color:#fff;">
+<body>
 
-  <!-- Contenedor del reproductor -->
-  <div id="lunaradio" style="width:100%; height:100vh; background:#000;">
-    Cargando reproductor...
+  <!-- Contenedor principal -->
+  <div id="lunaradio">
+    <div class="station-name">BELLOS RECUERDOS</div>
+    <div class="station-slogan">"Te llevamos a tu época"</div>
+    <img id="cover" class="cover" src="js/brlogo.png" alt="Logo">
+    <div id="metadata" class="metadata">Cargando canción...</div>
   </div>
 
-  <!-- Audio nativo oculto -->
+  <!-- Reproductor nativo oculto -->
   <audio id="radioNative" autoplay>
     <source src="https://whmsonic.playerfullhd.com:7034/stream" type="audio/mpeg">
   </audio>
 
   <script>
-    // Inicializamos Luna SOLO para interfaz y metadatos
+    // Inicializar Lunaradio para obtener metadatos + portada
     $("#lunaradio").lunaradio({
-      userinterface: "big", 
-      backgroundcolor: "#000000",
-      fontcolor: "#ffffff",
-      hightlightcolor: "#FF6767", 
-      fontname: "Bebas Neue", 
-      googlefont: "Bebas+Neue&display=swap", 
-      fontratio: "0.4", 
-      radioname: "BELLOS RECUERDOS", 
-      scroll: "true",
-      coverimage: "js/brlogo.png",  // tu logo
-      onlycoverimage: "false",
+      radioname: "BELLOS RECUERDOS",
+      coverimage: "js/brlogo.png",
       coverstyle: "square",
-      usevisualizer: "real", 
-      visualizertype: "0", 
-      streamurl: "https://whmsonic.playerfullhd.com:7034", 
-      streamtype: "shoutcast2", 
+      streamurl: "https://whmsonic.playerfullhd.com:7034",
+      streamtype: "shoutcast2",
       shoutcastpath: "/stream",
-      shoutcastid: "1", 
-      itunestoken: "1000lIPN", 
-      metadatainterval: "5000", 
-      volume: "80",
-      autoplay: "false" // Luna no reproduce audio
+      shoutcastid: "1",
+      metadatainterval: "5000"
     });
 
-    // Reproductor nativo
+    // Control del audio nativo
     const audio = document.getElementById("radioNative");
     audio.volume = 0.8;
-    audio.play().catch(() => console.log("Autoplay bloqueado"));
+    audio.play().catch(() => {
+      console.log("Autoplay bloqueado, se requiere interacción");
+    });
   </script>
 
 </body>
