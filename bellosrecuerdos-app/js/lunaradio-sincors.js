@@ -1,6 +1,7 @@
 /*
- * LunaRadio - versión modificada sin botones de control
- * Conserva metadatos, portada y estilos, pero no genera play, volumen ni extras.
+ * LunaRadio - versión modificada
+ * Solo muestra: Nombre estación + carátula + metadatos
+ * Audio manejado por <audio> nativo en index.html
  */
 
 (function ($) {
@@ -18,20 +19,18 @@
       coverimage: "",
       onlycoverimage: "false",
       coverstyle: "square",
-      usevisualizer: "false",
-      visualizertype: "0",
       streamurl: "",
       streamtype: "shoutcast2",
       shoutcastpath: "/stream",
       shoutcastid: "1",
       itunestoken: "1000lIPN",
       metadatainterval: "5000",
-      autoplay: "false",
+      autoplay: "false"
     }, options);
 
     // estructura del contenedor
     var html = '';
-    html += '<div class="lunaradio-container" style="font-family:' + settings.fontname + '; color:' + settings.fontcolor + ';">';
+    html += '<div class="lunaradio-container" style="font-family:' + settings.fontname + '; color:' + settings.fontcolor + '; background:' + settings.backgroundcolor + ';">';
     html += '  <div class="lunaradio-header">';
     html += '    <div class="lunaradio-title">' + settings.radioname + '</div>';
     html += '  </div>';
@@ -53,7 +52,8 @@
         success: function (data) {
           if (data && data.songtitle) {
             $("#lunaradio-songtitle").text(data.songtitle);
-            // búsqueda portada en iTunes
+
+            // búsqueda de portada en iTunes
             $.ajax({
               url: "https://itunes.apple.com/search",
               dataType: "jsonp",
@@ -64,7 +64,10 @@
               },
               success: function (res) {
                 if (res.results && res.results.length > 0) {
-                  $("#lunaradio-coverart").attr("src", res.results[0].artworkUrl100.replace("100x100", "300x300"));
+                  $("#lunaradio-coverart").attr(
+                    "src",
+                    res.results[0].artworkUrl100.replace("100x100", "300x300")
+                  );
                 }
               }
             });
