@@ -1,72 +1,80 @@
-(function($){
-  $.fn.lunaradio = function(options) {
+/*
+ * LunaRadio - versión modificada sin botones de control
+ * Conserva metadatos, portada y estilos, pero no genera play, volumen ni extras.
+ */
 
-    let settings = $.extend({
+(function ($) {
+  $.fn.lunaradio = function (options) {
+    var settings = $.extend({
+      userinterface: "big",
+      backgroundcolor: "#000000",
+      fontcolor: "#ffffff",
+      hightlightcolor: "#FF6767",
+      fontname: "Bebas Neue",
+      googlefont: "Bebas+Neue&display=swap",
+      fontratio: "0.4",
+      radioname: "Radio Online",
+      scroll: "true",
+      coverimage: "",
+      onlycoverimage: "false",
+      coverstyle: "square",
+      usevisualizer: "false",
+      visualizertype: "0",
       streamurl: "",
       streamtype: "shoutcast2",
       shoutcastpath: "/stream",
       shoutcastid: "1",
       itunestoken: "1000lIPN",
-      metadatainterval: 5000,
+      metadatainterval: "5000",
+      autoplay: "false",
     }, options);
 
-    let lastTrack = "";
+    // estructura del contenedor
+    var html = '';
+    html += '<div class="lunaradio-container" style="font-family:' + settings.fontname + '; color:' + settings.fontcolor + ';">';
+    html += '  <div class="lunaradio-header">';
+    html += '    <div class="lunaradio-title">' + settings.radioname + '</div>';
+    html += '  </div>';
+    html += '  <div class="lunaradio-cover">';
+    html += '    <img id="lunaradio-coverart" src="' + settings.coverimage + '" class="cover-' + settings.coverstyle + '">';
+    html += '  </div>';
+    html += '  <div class="lunaradio-meta">';
+    html += '    <div id="lunaradio-songtitle">Cargando...</div>';
+    html += '  </div>';
+    html += '</div>';
 
-    function updateMetadata(title, artist, coverUrl) {
-      const newTrack = title + " - " + artist;
+    $(this).html(html);
 
-      if (newTrack !== lastTrack) {
-        lastTrack = newTrack;
-
-        // Texto
-        $("#luna-track").text(newTrack);
-
-        // Imagen
-        if (!coverUrl || coverUrl === "") {
-          coverUrl = "js/brlogo.png"; // logo por defecto
-        }
-        if (typeof updateCover === "function") {
-          updateCover(coverUrl);
-        }
-      }
-    }
-
-    function fetchMetadata() {
-      let url = settings.streamurl + "/stats?sid=" + settings.shoutcastid + "&json=1";
-
-      fetch(url)
-        .then(r => r.json())
-        .then(data => {
-          let title = "Desconocido";
-          let artist = "";
-          if (data.songtitle) {
-            let parts = data.songtitle.split(" - ");
-            artist = parts[0] || "";
-            title  = parts[1] || parts[0] || "Desconocido";
-          }
-
-          // Buscar carátula en iTunes
-          let cover = "";
-          if (artist && title) {
-            fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artist + " " + title)}&entity=musicTrack&limit=1&token=${settings.itunestoken}`)
-              .then(r => r.json())
-              .then(itunes => {
-                if (itunes.results && itunes.results.length > 0) {
-                  cover = itunes.results[0].artworkUrl100.replace("100x100", "300x300");
+    // === METADATOS ===
+    function updateMetadata() {
+      $.ajax({
+        url: settings.streamurl + "/stats?sid=" + settings.shoutcastid + "&json=1",
+        dataType: "json",
+        success: function (data) {
+          if (data && data.songtitle) {
+            $("#lunaradio-songtitle").text(data.songtitle);
+            // búsqueda portada en iTunes
+            $.ajax({
+              url: "https://itunes.apple.com/search",
+              dataType: "jsonp",
+              data: {
+                term: data.songtitle,
+                media: "music",
+                limit: 1
+              },
+              success: function (res) {
+                if (res.results && res.results.length > 0) {
+                  $("#lunaradio-coverart").attr("src", res.results[0].artworkUrl100.replace("100x100", "300x300"));
                 }
-                updateMetadata(title, artist, cover);
-              });
-          } else {
-            updateMetadata(title, artist, "");
+              }
+            });
           }
-        })
-        .catch(err => console.error("Error metadata:", err));
+        }
+      });
     }
 
-    // Inicia interval
-    setInterval(fetchMetadata, settings.metadatainterval);
-    fetchMetadata();
-
-    return this;
+    // actualización periódica
+    setInterval(updateMetadata, settings.metadatainterval);
+    updateMetadata();
   };
-})(jQuery);
+}(jQuery));
